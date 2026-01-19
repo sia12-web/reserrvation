@@ -100,10 +100,20 @@ export async function httpGet<TResponse>(
     });
 
     const text = await response.text();
-    const data = text ? JSON.parse(text) : undefined;
+    const contentType = response.headers.get("content-type") ?? "";
+    const expectsJson = contentType.includes("application/json");
+
+    let data: any = undefined;
+    if (text && expectsJson) {
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        // Fallback or ignore
+      }
+    }
 
     if (!response.ok) {
-      throw new ApiError(data?.error || "Request failed", {
+      throw new ApiError(data?.error || text || "Request failed", {
         status: response.status,
         details: data?.details,
       });

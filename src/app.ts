@@ -35,6 +35,7 @@ app.get("/admin/test", (_req, res) => {
 
 app.use(layoutRouter);
 app.use(reservationsRouter);
+app.use("/admin", authRouter);
 app.use("/admin", adminRouter);
 console.log("Admin routes mounted at /admin");
 app.use(errorHandler);

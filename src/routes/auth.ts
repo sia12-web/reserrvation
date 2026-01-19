@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { env } from "../config/env";
 import { asyncHandler } from "../utils/asyncHandler";
 import { HttpError } from "../middleware/errorHandler";
+import { adminAuth } from "../middleware/auth";
 import rateLimit from "express-rate-limit";
 
 const router = Router();
@@ -40,16 +41,9 @@ router.post(
 
 router.get(
     "/me",
-    (req, res, next) => {
-        // We reuse the logic in adminAuth middleware but here we want to return 200 if OK
-        try {
-            const { adminAuth } = require("../middleware/auth");
-            adminAuth(req, res, () => {
-                res.json({ authenticated: true });
-            });
-        } catch (err) {
-            next(err);
-        }
+    adminAuth,
+    (_req, res) => {
+        res.json({ authenticated: true });
     }
 );
 
