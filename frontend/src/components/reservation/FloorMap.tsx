@@ -17,6 +17,7 @@ export default function FloorMap({
     selectedTableIds = [],
     onSelectTable,
     readOnly = false,
+    partySize,
 }: FloorMapProps) {
     const PADDING = 40;
 
@@ -36,7 +37,21 @@ export default function FloorMap({
     const getTableStatus = (table: Table) => {
         if (unavailableTableIds.includes(table.id)) return 'LOCKED';
         if (selectedTableIds.includes(table.id)) return 'SELECTED';
-        return table.status || 'AVAILABLE'; // Default to AVAILABLE if undefined
+
+        // Kiosk/User View: Check if party fits
+        if (!isAdminView && partySize) {
+            // Rule: Party must fit max capacity
+            if (partySize > table.maxCapacity) return 'INVALID';
+
+            // Rule: Large tables (merged) must meet min capacity
+            const isLarge = table.type === "MERGED_FIXED" || table.maxCapacity >= 8;
+            if (isLarge && partySize < table.minCapacity) return 'INVALID';
+
+            // Rule: Circular tables for 5-7 only
+            if (table.type === "CIRCULAR" && (partySize < 5 || partySize > 7)) return 'INVALID';
+        }
+
+        return table.status || 'AVAILABLE';
     };
 
     const isAdminView = layout.name === "Floor View";
@@ -69,8 +84,8 @@ export default function FloorMap({
                     const status = getTableStatus(table);
                     const isSelected = status === 'SELECTED';
 
-                    // Logic for User View: Hide specific unavailable reasons (Occupied vs Reserved) -> just "Unavailable"
-                    const isUnavailableUser = !isAdminView && (status === 'OCCUPIED' || status === 'RESERVED' || status === 'LOCKED');
+                    const isTrulyLocked = status === 'LOCKED' || (isAdminView && (status === 'OCCUPIED' || status === 'RESERVED'));
+                    const isDimmed = !isAdminView && (status === 'LOCKED' || status === 'INVALID' || status === 'OCCUPIED' || status === 'RESERVED');
 
                     let fillColor = "#ffffff";
                     let strokeColor = "#cbd5e1";
@@ -79,8 +94,8 @@ export default function FloorMap({
                     if (isSelected) {
                         fillColor = "#2563eb"; // Blue
                         strokeColor = "#1e40af";
-                    } else if (isUnavailableUser) {
-                        fillColor = "#f1f5f9"; // Slate 100 (Generic Unavailable)
+                    } else if (isDimmed) {
+                        fillColor = "#f1f5f9"; // Slate 100 
                         strokeColor = "#cbd5e1";
                         opacity = "0.7";
                     } else if (status === 'OCCUPIED' && isAdminView) {
@@ -89,30 +104,24 @@ export default function FloorMap({
                     } else if (status === 'RESERVED' && isAdminView) {
                         fillColor = "#faf5ff"; // Purple 50
                         strokeColor = "#a855f7";
-                    } else if (status === 'LOCKED') {
-                        fillColor = "#f1f5f9"; // Slate 100
-                        strokeColor = "#e2e8f0";
-                        opacity = "0.5";
                     } else {
                         // Available
                         strokeColor = "#94a3b8";
                     }
 
                     const handleClick = () => {
-                        if (readOnly || status === 'LOCKED' || isUnavailableUser) return;
+                        if (readOnly || isTrulyLocked) return;
                         onSelectTable?.(table.id);
                     };
 
                     const commonProps = {
-                        key: table.id,
-                        onClick: handleClick,
                         fill: fillColor,
                         stroke: strokeColor,
                         strokeWidth: "2",
                         opacity: opacity,
                         className: clsx(
                             "transition-all duration-200",
-                            (status !== 'LOCKED' && !isUnavailableUser && !readOnly) && "cursor-pointer hover:opacity-80"
+                            (!isTrulyLocked && !readOnly) && "cursor-pointer hover:opacity-80"
                         )
                     };
 

@@ -192,6 +192,7 @@ export default function ReservationForm({
     const payload: ReservationRequest = {
       clientName: clientName.trim(),
       clientPhone: normalizedPhone,
+      clientEmail: clientEmail.trim() || undefined,
       partySize,
       startTime: toUtcIso(selectedSlot),
       source: "KIOSK",
@@ -224,6 +225,17 @@ export default function ReservationForm({
 
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
+      {Object.keys(fieldErrors).length > 0 && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-md">
+          <p className="text-red-800 font-semibold">Please correct the following errors:</p>
+          <ul className="list-disc list-inside text-red-700 text-sm mt-1">
+            {Object.values(fieldErrors).map((err, i) => (
+              <li key={i}>{err}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <div className="grid gap-4">
         <label className="block space-y-2">
           <span className="text-lg font-medium">Name</span>
@@ -256,9 +268,9 @@ export default function ReservationForm({
             placeholder="name@example.com"
             autoComplete="off"
           />
-          <p className="text-xs text-slate-500">
-            Not sent to the reservation system yet.
-          </p>
+          {fieldErrors.clientEmail ? (
+            <p className="text-red-600 text-sm mt-1">{fieldErrors.clientEmail}</p>
+          ) : null}
         </label>
 
         <div className="space-y-2">
@@ -356,7 +368,17 @@ export default function ReservationForm({
                     }
                   }
 
-                  // Rule C: Standard Tables -> No specific rules other than fit
+                  // Rule C: Standard Tables -> Preference for Circular if party is 5-7
+                  let hasPreferenceWarning = false;
+                  if (!isCircular && partySize >= 5 && partySize <= 7) {
+                    const anyCircularAvailable = layoutData.tables.some(t =>
+                      t.type === "CIRCULAR" && !availabilityData?.unavailableTableIds.includes(t.id)
+                    );
+                    if (anyCircularAvailable) {
+                      setFormError("Parties of 5-7 are preferred at our circular tables.");
+                      hasPreferenceWarning = true;
+                    }
+                  }
 
                   // Capacity check (Global)
                   if (partySize > table.maxCapacity && !isOverflow) {
@@ -364,16 +386,21 @@ export default function ReservationForm({
                     return;
                   }
 
-                  // Special check for T15 if we want to enforce max cap even if overflow? 
+                  // Special check for T15 if we want to enforce max cap even if overflow?
                   // T15 is max 20, so simple capacity check works fine.
                   if (isOverflow && partySize > table.maxCapacity) {
                     setFormError(`Overflow table only seats up to ${table.maxCapacity} people.`);
                     return;
                   }
 
-                  setFormError(null);
+                  if (!hasPreferenceWarning) {
+                    setFormError(null);
+                  }
+
                   setSelectedTableIds((prev) =>
-                    prev.includes(id) ? prev.filter((t) => t !== id) : [id]
+                    prev.includes(id)
+                      ? prev.filter((t) => t !== id)
+                      : [...prev, id]
                   );
                 }}
               />

@@ -1,6 +1,6 @@
 
 import { prisma } from "../config/prisma";
-import { sendReservationReminder, sendLateWarning } from "./email";
+import { sendReservationReminder, sendLateWarning, sendThankYouEmail } from "./email";
 import pino from "pino";
 
 const logger = pino();
@@ -13,6 +13,7 @@ export function startScheduler() {
         try {
             await checkReminders();
             await checkLateWarnings();
+            await checkThankYouEmails();
         } catch (error) {
             logger.error({ msg: "Scheduler error", error });
         }
@@ -86,6 +87,44 @@ async function checkLateWarnings() {
         await prisma.reservation.update({
             where: { id: res.id },
             data: { lateWarningSent: true },
+        });
+    }
+}
+
+async function checkThankYouEmails() {
+    const now = new Date();
+    // Send 30 mins after end time
+    const endWindow = new Date(now.getTime() - 30 * 60 * 1000);
+
+    const endedReservations = await prisma.reservation.findMany({
+        where: {
+            status: { in: ["COMPLETED", "CHECKED_IN"] },
+            thankYouSent: false,
+            endTime: {
+                lt: endWindow,
+                gt: new Date(now.getTime() - 12 * 60 * 60 * 1000),
+            },
+        },
+    });
+
+    for (const res of endedReservations) {
+        if (!res.clientEmail) {
+            await prisma.reservation.update({
+                where: { id: res.id },
+                data: { thankYouSent: true },
+            });
+            continue;
+        }
+
+        await sendThankYouEmail({
+            to: res.clientEmail,
+            clientName: res.clientName,
+            shortId: res.shortId,
+        });
+
+        await prisma.reservation.update({
+            where: { id: res.id },
+            data: { thankYouSent: true },
         });
     }
 }

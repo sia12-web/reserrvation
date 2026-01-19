@@ -66,6 +66,7 @@ model Reservation {
   freedAt       DateTime?
   reminderSent  Boolean           @default(false)
   lateWarningSent Boolean         @default(false)
+  thankYouSent  Boolean           @default(false)
   createdAt     DateTime          @default(now())
   reservationTables ReservationTable[]
   payments      Payment[]

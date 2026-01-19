@@ -6,13 +6,13 @@ import { redlock } from "../config/redis";
 import { stripe } from "../config/stripe";
 import { env } from "../config/env";
 import { asyncHandler } from "../utils/asyncHandler";
-import { alignToSlotInterval, calculateDurationMinutes, isWithinBusinessHours } from "../utils/time";
+import { alignToSlotInterval, calculateDurationMinutes, isWithinBusinessHours, getClosingTime } from "../utils/time";
 import { generateShortId } from "../utils/shortId";
 import { HttpError } from "../middleware/errorHandler";
 import { checkAvailability, acquireTableLocks } from "../services/availability";
 import { findBestTableAssignment } from "../services/tableAssignment/engine";
 import { TableConfig } from "../services/tableAssignment/types";
-import { sendReservationConfirmation } from "../services/email";
+import { sendReservationConfirmation, sendDepositRequestEmail } from "../services/email";
 import rateLimit from "express-rate-limit";
 
 const router = Router();
@@ -78,7 +78,14 @@ router.post(
     }
 
     const durationMinutes = calculateDurationMinutes(payload.partySize);
-    const endTime = new Date(startTime.getTime() + durationMinutes * 60_000);
+    let endTime = new Date(startTime.getTime() + durationMinutes * 60_000);
+
+    // If it passes after 30 minutes of closing the time end should be till the closing
+    const closingTime = getClosingTime(startTime);
+    const limit = new Date(closingTime.getTime() + 30 * 60_000);
+    if (endTime > limit) {
+      endTime = closingTime;
+    }
 
     const activeLayout = await prisma.layout.findFirst({
       where: { isActive: true },
@@ -264,17 +271,29 @@ router.post(
         { isolationLevel: "Serializable" }
       );
 
-      if (reservation.status === "CONFIRMED" && reservation.clientEmail) {
-        // Fire and forget email
-        sendReservationConfirmation({
-          to: reservation.clientEmail,
-          clientName: reservation.clientName,
-          partySize: reservation.partySize,
-          startTime: reservation.startTime,
-          shortId: reservation.shortId,
-          tableIds,
-          customerNotes: reservation.customerNotes || undefined,
-        }).catch(err => console.error("Email error:", err));
+      if (reservation.clientEmail) {
+        if (reservation.status === "CONFIRMED") {
+          // Fire and forget confirmation email
+          sendReservationConfirmation({
+            to: reservation.clientEmail,
+            clientName: reservation.clientName,
+            partySize: reservation.partySize,
+            startTime: reservation.startTime,
+            shortId: reservation.shortId,
+            tableIds,
+            customerNotes: reservation.customerNotes || undefined,
+          }).catch(err => console.error("Confirmation email error:", err));
+        } else if (reservation.status === "PENDING_DEPOSIT") {
+          // Send deposit request email for parties > 10
+          sendDepositRequestEmail({
+            to: reservation.clientEmail,
+            clientName: reservation.clientName,
+            partySize: reservation.partySize,
+            startTime: reservation.startTime,
+            shortId: reservation.shortId,
+            tableIds,
+          }).catch(err => console.error("Deposit request email error:", err));
+        }
       }
 
       res.status(201).json({
@@ -327,7 +346,13 @@ router.get(
     }
 
     const durationMinutes = calculateDurationMinutes(partySize);
-    const endTime = new Date(startTime.getTime() + durationMinutes * 60_000);
+    let endTime = new Date(startTime.getTime() + durationMinutes * 60_000);
+
+    const closingTime = getClosingTime(startTime);
+    const limit = new Date(closingTime.getTime() + 30 * 60_000);
+    if (endTime > limit) {
+      endTime = closingTime;
+    }
 
     const unavailable = await checkAvailability(prisma, { startTime, endTime });
 
@@ -410,7 +435,14 @@ router.get(
     while (cursor < endOfDay) {
       if (isWithinBusinessHours(cursor)) {
         const slotStart = new Date(cursor);
-        const slotEnd = new Date(slotStart.getTime() + durationMinutes * 60_000);
+        const durationMinutes = calculateDurationMinutes(partySize);
+        let slotEnd = new Date(slotStart.getTime() + durationMinutes * 60_000);
+
+        const closingTime = getClosingTime(slotStart);
+        const limit = new Date(closingTime.getTime() + 30 * 60_000);
+        if (slotEnd > limit) {
+          slotEnd = closingTime;
+        }
 
         // Find occupied tables
         const busyTableIds = new Set<string>();

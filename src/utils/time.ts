@@ -49,3 +49,16 @@ export function isWithinBusinessHours(date: Date): boolean {
   return timeNum >= 1130 && timeNum <= 2215;
 }
 
+export function getClosingTime(date: Date): Date {
+  const d = dayjs(date).tz(RESTAURANT_TZ);
+  const day = d.day();
+
+  // Closing: 22:00 (Sun-Thu), 23:00 (Fri-Sat)
+  let closingHours = 22;
+  if (day === 5 || day === 6) {
+    closingHours = 23;
+  }
+
+  return d.hour(closingHours).minute(0).second(0).millisecond(0).toDate();
+}
+

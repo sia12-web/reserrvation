@@ -151,3 +151,77 @@ export async function sendLateWarning(params: ReservationEmailParams) {
         logger.error({ msg: "Failed to send late warning email", error, shortId });
     }
 }
+
+export async function sendThankYouEmail(params: { to: string; clientName: string; shortId: string }) {
+    const { to, clientName, shortId } = params;
+
+    const html = `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+        <h1 style="color: #1e293b; margin-bottom: 24px; text-align: center;">Thank You for Visiting!</h1>
+        <p style="color: #475569; font-size: 16px;">Hi <strong>${clientName}</strong>,</p>
+        <p style="color: #475569; font-size: 16px;">It was a pleasure having you at <strong>Diba Restaurant</strong> today. We hope you enjoyed your meal and our service!</p>
+        <p style="color: #475569; font-size: 16px;">If you have a moment, we would greatly appreciate it if you could share your experience by leaving us a review. Your feedback helps us grow and continue providing the best experience for our guests.</p>
+        
+        <div style="text-align: center; margin-top: 32px; padding: 24px; background-color: #f8fafc; border-radius: 12px;">
+            <p style="margin-bottom: 20px; color: #334155; font-weight: bold;">How did we do?</p>
+            <a href="${env.reviewLink}" style="background-color: #059669; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 16px;">Leave a Review</a>
+        </div>
+
+        <p style="margin-top: 32px; text-align: center; color: #94a3b8; font-size: 14px;">We look forward to seeing you again soon!</p>
+        <p style="text-align: center; color: #94a3b8; font-size: 12px;">Reservation ID: ${shortId}</p>
+    </div>
+    `;
+
+    try {
+        await transporter.sendMail({
+            from: env.mailFrom,
+            to: env.mailFrom,
+            cc: to,
+            subject: `Thank you for dining with us! - ${clientName}`,
+            html,
+        });
+        logger.info({ msg: "Thank you email sent", shortId, to });
+    } catch (error) {
+        logger.error({ msg: "Failed to send thank you email", error, shortId });
+    }
+}
+
+export async function sendDepositRequestEmail(params: ReservationEmailParams) {
+    const { to, clientName, partySize, startTime, shortId } = params;
+
+    const dateStr = startTime.toLocaleString("en-CA", {
+        dateStyle: "full",
+        timeStyle: "short",
+        timeZone: "America/Montreal",
+    });
+
+    const html = `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+        <h1 style="color: #1e293b; margin-bottom: 24px; text-align: center;">Deposit Required</h1>
+        <p style="color: #475569; font-size: 16px;">Hi <strong>${clientName}</strong>,</p>
+        <p style="color: #475569; font-size: 16px;">Thank you for your reservation request for <strong>${partySize} guests</strong> on <strong>${dateStr}</strong>.</p>
+        <p style="color: #475569; font-size: 16px;">For parties larger than 10, we require a <strong>$50 security deposit</strong> to confirm the booking. This deposit will be credited toward your final bill.</p>
+        
+        <div style="background-color: #fffbeb; padding: 20px; border: 1px solid #fef3c7; border-radius: 8px; margin: 24px 0;">
+            <p style="color: #92400e; margin: 0; font-weight: bold; text-align: center;">Your reservation is currently on HOLD.</p>
+            <p style="color: #92400e; margin: 10px 0 0 0; font-size: 14px; text-align: center;">A member of our team will contact you shortly with a payment link to secure your table.</p>
+        </div>
+
+        <p style="color: #475569; font-size: 14px;">Confirmation Code: <strong>${shortId}</strong></p>
+        <p style="margin-top: 32px; text-align: center; color: #94a3b8; font-size: 14px;">If you have any questions, please reply to this email or call us.</p>
+    </div>
+    `;
+
+    try {
+        await transporter.sendMail({
+            from: env.mailFrom,
+            to: env.mailFrom,
+            cc: to,
+            subject: `Action Required: Deposit for Reservation ${shortId}`,
+            html,
+        });
+        logger.info({ msg: "Deposit request email sent", shortId, to });
+    } catch (error) {
+        logger.error({ msg: "Failed to send deposit request email", error, shortId });
+    }
+}

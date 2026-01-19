@@ -6,7 +6,8 @@
     "dev": "npx tsx watch src/index.ts",
     "build": "tsc",
     "prisma:generate": "prisma generate",
-    "test": "jest"
+    "test": "jest",
+    "ci": "npm run prisma:generate && npm run build && npm run test && cd frontend && npm install && npm run build"
   },
   "keywords": [],
   "author": "",

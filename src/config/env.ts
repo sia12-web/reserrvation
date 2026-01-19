@@ -30,4 +30,5 @@ export const env = {
   depositThreshold: Number(process.env.DEPOSIT_THRESHOLD ?? "10"),
   allowedOrigins: (process.env.ALLOWED_ORIGINS ?? "http://localhost:5173").split(",").map(o => o.trim()),
   jwtSecret: requireInProduction(process.env.JWT_SECRET, "JWT_SECRET"),
+  reviewLink: process.env.REVIEW_LINK ?? "https://search.google.com/local/writereview?placeid=YOUR_PLACE_ID",
 };
