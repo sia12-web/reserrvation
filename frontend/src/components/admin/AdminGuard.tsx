@@ -1,10 +1,25 @@
-import React, { useState } from "react";
-import { Navigate, Outlet } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Navigate, Outlet, useNavigate } from "react-router-dom";
+import { adminLogin, verifySession } from "../../api/auth.api";
 
 export default function AdminGuard() {
-    const pin = localStorage.getItem("admin_pin") || "";
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
-    if (!pin) {
+    useEffect(() => {
+        verifySession()
+            .then(() => setIsAuthenticated(true))
+            .catch(() => setIsAuthenticated(false));
+    }, []);
+
+    if (isAuthenticated === null) {
+        return (
+            <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+                <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+
+    if (!isAuthenticated) {
         return <Navigate to="/admin/login" replace />;
     }
 
@@ -14,14 +29,22 @@ export default function AdminGuard() {
 export function AdminLogin() {
     const [pin, setPin] = useState("");
     const [error, setError] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const navigate = useNavigate();
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (pin.length >= 4) {
-            localStorage.setItem("admin_pin", pin);
-            window.location.href = "/admin/floor";
-        } else {
-            setError("PIN must be at least 4 digits");
+        setError("");
+        setIsSubmitting(true);
+
+        try {
+            await adminLogin(pin);
+            // On success, the cookie is set. We can navigate.
+            navigate("/admin/floor");
+        } catch (err: any) {
+            setError(err.message || "Authentication failed");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -40,7 +63,8 @@ export function AdminLogin() {
                         <input
                             type="password"
                             required
-                            className="appearance-none rounded-xl relative block w-full px-4 py-4 border border-slate-600 bg-slate-700 placeholder-slate-400 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-2xl tracking-[1em]"
+                            disabled={isSubmitting}
+                            className="appearance-none rounded-xl relative block w-full px-4 py-4 border border-slate-600 bg-slate-700 placeholder-slate-400 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-2xl tracking-[1em] disabled:opacity-50"
                             placeholder="••••"
                             value={pin}
                             onChange={(e) => setPin(e.target.value)}
@@ -49,9 +73,10 @@ export function AdminLogin() {
                     {error && <p className="text-red-400 text-sm text-center font-medium">{error}</p>}
                     <button
                         type="submit"
-                        className="group relative w-full flex justify-center py-4 px-4 border border-transparent text-lg font-bold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all shadow-lg active:scale-95"
+                        disabled={isSubmitting}
+                        className="group relative w-full flex justify-center py-4 px-4 border border-transparent text-lg font-bold rounded-xl text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all shadow-lg active:scale-95 disabled:opacity-50"
                     >
-                        Authenticate
+                        {isSubmitting ? "Authenticating..." : "Authenticate"}
                     </button>
                 </form>
             </div>

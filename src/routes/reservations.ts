@@ -38,7 +38,20 @@ export const reservationSchema = z.object({
 
 const reservationsLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  limit: 100, // Relaxed for testing
+  limit: 5, // 5 creations per hour per IP
+  message: { error: "Too many reservations created from this IP, please try again after an hour" },
+});
+
+const cancellationLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 3, // 3 cancellations per hour per IP
+  message: { error: "Too many cancellation attempts, please try again later" },
+});
+
+const publicLookupLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 20, // 20 lookups per hour per IP
+  message: { error: "Too many lookup attempts" },
 });
 
 router.post(
@@ -432,6 +445,7 @@ router.get(
 
 router.get(
   "/reservations/:shortId",
+  publicLookupLimiter,
   asyncHandler(async (req, res) => {
     const shortId = req.params.shortId as string;
 
@@ -456,6 +470,7 @@ router.get(
 
 router.post(
   "/reservations/:id/cancel",
+  cancellationLimiter,
   asyncHandler(async (req, res) => {
     const id = req.params.id as string;
     const { reason } = req.body;

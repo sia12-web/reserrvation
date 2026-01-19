@@ -10,8 +10,17 @@ import { findBestTableAssignment } from "../services/tableAssignment/engine";
 import { TableConfig } from "../services/tableAssignment/types";
 import { generateShortId } from "../utils/shortId";
 import { redlock } from "../config/redis";
+import rateLimit from "express-rate-limit";
 
 const router = Router();
+
+const adminActionLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100, // 100 actions per 15 mins for admins
+    message: { error: "Too many admin actions, please slow down" },
+});
+
+router.use(adminActionLimiter);
 
 // Apply auth to all admin routes
 router.use(adminAuth);
@@ -89,9 +98,9 @@ router.get(
 router.get(
     "/reservations/:id",
     asyncHandler(async (req, res) => {
-        const id = req.params.id as string;
+        const reservationId = String(req.params.id);
         const reservation = await prisma.reservation.findUnique({
-            where: { id },
+            where: { id: reservationId },
             include: {
                 reservationTables: true,
                 payments: true,
@@ -217,14 +226,14 @@ router.get(
 router.post(
     "/reservations/:id/late-warning",
     asyncHandler(async (req, res) => {
-        const { id } = req.params;
+        const reservationId = String(req.params.id);
 
         const reservation = await prisma.reservation.findUnique({
-            where: { id },
+            where: { id: reservationId },
             include: {
                 reservationTables: true
             }
-        });
+        }) as any;
 
         if (!reservation) {
             throw new HttpError(404, "Reservation not found");
@@ -236,13 +245,13 @@ router.post(
 
         await prisma.$transaction(async (tx) => {
             await tx.reservation.update({
-                where: { id },
+                where: { id: reservationId },
                 data: { lateWarningSent: true } as any,
             });
 
             await (tx as any).auditLog.create({
                 data: {
-                    reservationId: id,
+                    reservationId: reservationId,
                     action: "LATE_WARNING_SENT",
                     reason: "Admin prompted via system",
                 },
@@ -259,7 +268,7 @@ router.post(
             partySize: reservation.partySize,
             startTime: reservation.startTime,
             shortId: reservation.shortId,
-            tableIds: reservation.reservationTables.map(rt => rt.tableId)
+            tableIds: (reservation as any).reservationTables.map((rt: any) => rt.tableId)
         });
 
         res.json({ message: "Late warning email sent" });
@@ -605,7 +614,7 @@ router.post(
 router.post(
     "/tables/:tableId/free",
     asyncHandler(async (req, res) => {
-        const { tableId } = req.params;
+        const tableId = req.params.tableId as string;
         const { reason } = z.object({ reason: z.string() }).parse(req.body);
         const now = new Date();
 
@@ -665,10 +674,11 @@ router.post(
     "/reservations/:id/cancel",
     asyncHandler(async (req, res) => {
         const { id } = req.params;
+        const reservationId = String(id);
         const { reason } = z.object({ reason: z.string().min(1) }).parse(req.body);
 
         const reservation = await prisma.reservation.findUnique({
-            where: { id },
+            where: { id: reservationId },
         });
 
         if (!reservation) {
@@ -681,7 +691,7 @@ router.post(
 
         await prisma.$transaction(async (tx) => {
             await tx.reservation.update({
-                where: { id },
+                where: { id: reservationId },
                 data: {
                     status: "CANCELLED",
                     // We don't change times, just status
@@ -690,7 +700,7 @@ router.post(
 
             await (tx as any).auditLog.create({
                 data: {
-                    reservationId: id,
+                    reservationId: reservationId,
                     action: "RESERVATION_CANCELLED",
                     before: { status: reservation.status },
                     after: { status: "CANCELLED" },

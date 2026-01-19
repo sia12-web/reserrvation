@@ -63,6 +63,7 @@ export async function httpPost<TResponse>(
       },
       body: JSON.stringify(body),
       signal: controller.signal,
+      credentials: "include",
     });
 
     const text = await response.text();
@@ -186,6 +187,7 @@ export async function httpGet<TResponse>(
         ...options.headers
       },
       signal: controller.signal,
+      credentials: "include",
     });
 
     const text = await response.text();

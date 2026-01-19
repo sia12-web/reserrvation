@@ -28,4 +28,6 @@ export const env = {
   mailFrom: process.env.MAIL_FROM ?? "no-reply@reservation.com",
   adminPin: process.env.ADMIN_PIN ?? "1234",
   depositThreshold: Number(process.env.DEPOSIT_THRESHOLD ?? "10"),
+  allowedOrigins: (process.env.ALLOWED_ORIGINS ?? "http://localhost:5173").split(",").map(o => o.trim()),
+  jwtSecret: requireInProduction(process.env.JWT_SECRET, "JWT_SECRET"),
 };

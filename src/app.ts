@@ -1,13 +1,23 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
+import cookieParser from "cookie-parser";
+import { env } from "./config/env";
 import reservationsRouter from "./routes/reservations";
 import layoutRouter from "./routes/layout";
 import webhooksRouter from "./routes/webhooks";
 import adminRouter from "./routes/admin";
+import authRouter from "./routes/auth";
 import { errorHandler } from "./middleware/errorHandler";
 
 const app = express();
-app.use(cors());
+
+app.use(helmet());
+app.use(cors({
+    origin: env.allowedOrigins,
+    credentials: true,
+}));
+app.use(cookieParser());
 
 app.use("/webhooks", express.raw({ type: "application/json" }), webhooksRouter);
 
