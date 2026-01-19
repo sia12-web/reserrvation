@@ -1,0 +1,222 @@
+import type { LayoutResponse, Table } from "../../api/layout.api";
+import clsx from "clsx";
+
+type FloorMapProps = {
+    layout: LayoutResponse;
+    unavailableTableIds?: string[];
+    selectedTableIds?: string[];
+    onSelectTable?: (tableId: string) => void;
+    readOnly?: boolean;
+    partySize?: number;
+};
+
+
+export default function FloorMap({
+    layout,
+    unavailableTableIds = [],
+    selectedTableIds = [],
+    onSelectTable,
+    readOnly = false,
+}: FloorMapProps) {
+    const PADDING = 40;
+
+    // Calculate bounds dynamically from tables to ensure they are all visible
+    const bounds = layout.tables.reduce(
+        (acc, t) => {
+            return {
+                minX: Math.min(acc.minX, t.x),
+                minY: Math.min(acc.minY, t.y),
+                maxX: Math.max(acc.maxX, t.x + t.width),
+                maxY: Math.max(acc.maxY, t.y + t.height),
+            };
+        },
+        { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity }
+    );
+
+    const getTableStatus = (table: Table) => {
+        if (unavailableTableIds.includes(table.id)) return 'LOCKED';
+        if (selectedTableIds.includes(table.id)) return 'SELECTED';
+        return table.status || 'AVAILABLE'; // Default to AVAILABLE if undefined
+    };
+
+    const isAdminView = layout.name === "Floor View";
+
+    return (
+        <div className="w-full h-full relative select-none">
+            <svg
+                viewBox={`${bounds.minX - PADDING} ${bounds.minY - PADDING} ${bounds.maxX - bounds.minX + PADDING * 2} ${bounds.maxY - bounds.minY + PADDING * 2}`}
+                className="w-full h-full drop-shadow-xl"
+                style={{ filter: 'drop-shadow(0 20px 30px rgb(0 0 0 / 0.15))' }}
+            >
+                {/* Floor rendering */}
+                <path
+                    d={`M ${bounds.minX - PADDING + 20} ${bounds.minY - PADDING}
+                        h ${bounds.maxX - bounds.minX + PADDING * 2 - 40}
+                        q 20 0 20 20
+                        v ${bounds.maxY - bounds.minY + PADDING * 2 - 40}
+                        q 0 20 -20 20
+                        h -${bounds.maxX - bounds.minX + PADDING * 2 - 40}
+                        q -20 0 -20 -20
+                        v -${bounds.maxY - bounds.minY + PADDING * 2 - 40}
+                        q 0 -20 20 -20 z`}
+                    fill="#f8fafc"
+                    stroke="#e2e8f0"
+                    strokeWidth="4"
+                />
+
+                {/* Tables rendering */}
+                {layout.tables.map((table) => {
+                    const status = getTableStatus(table);
+                    const isSelected = status === 'SELECTED';
+
+                    // Logic for User View: Hide specific unavailable reasons (Occupied vs Reserved) -> just "Unavailable"
+                    const isUnavailableUser = !isAdminView && (status === 'OCCUPIED' || status === 'RESERVED' || status === 'LOCKED');
+
+                    let fillColor = "#ffffff";
+                    let strokeColor = "#cbd5e1";
+                    let opacity = "1";
+
+                    if (isSelected) {
+                        fillColor = "#2563eb"; // Blue
+                        strokeColor = "#1e40af";
+                    } else if (isUnavailableUser) {
+                        fillColor = "#f1f5f9"; // Slate 100 (Generic Unavailable)
+                        strokeColor = "#cbd5e1";
+                        opacity = "0.7";
+                    } else if (status === 'OCCUPIED' && isAdminView) {
+                        fillColor = "#fffbeb"; // Amber 50
+                        strokeColor = "#fbbf24";
+                    } else if (status === 'RESERVED' && isAdminView) {
+                        fillColor = "#faf5ff"; // Purple 50
+                        strokeColor = "#a855f7";
+                    } else if (status === 'LOCKED') {
+                        fillColor = "#f1f5f9"; // Slate 100
+                        strokeColor = "#e2e8f0";
+                        opacity = "0.5";
+                    } else {
+                        // Available
+                        strokeColor = "#94a3b8";
+                    }
+
+                    const handleClick = () => {
+                        if (readOnly || status === 'LOCKED' || isUnavailableUser) return;
+                        onSelectTable?.(table.id);
+                    };
+
+                    const commonProps = {
+                        key: table.id,
+                        onClick: handleClick,
+                        fill: fillColor,
+                        stroke: strokeColor,
+                        strokeWidth: "2",
+                        opacity: opacity,
+                        className: clsx(
+                            "transition-all duration-200",
+                            (status !== 'LOCKED' && !isUnavailableUser && !readOnly) && "cursor-pointer hover:opacity-80"
+                        )
+                    };
+
+                    // Center for text
+                    let cx = table.x + table.width / 2;
+                    let cy = table.y + table.height / 2;
+
+                    if (table.shape === "CIRCLE") {
+                        const r = Math.min(table.width, table.height) / 2;
+                        cx = table.x + r;
+                        cy = table.y + r;
+
+                        return (
+                            <g key={table.id} onClick={handleClick}>
+                                <circle
+                                    cx={cx}
+                                    cy={cy}
+                                    r={r}
+                                    {...commonProps}
+                                />
+                                <text
+                                    x={cx}
+                                    y={cy}
+                                    dy="0.35em"
+                                    textAnchor="middle"
+                                    className={clsx(
+                                        "text-sm font-bold pointer-events-none select-none",
+                                        isSelected ? "fill-white" :
+                                            (status === "OCCUPIED" && isAdminView) ? "fill-amber-900" :
+                                                (status === "RESERVED" && isAdminView) ? "fill-purple-900" :
+                                                    "fill-slate-900"
+                                    )}
+                                >
+                                    {table.id.replace(/[A-Z]/g, "")}
+                                </text>
+                            </g>
+                        );
+                    }
+
+                    return (
+                        <g key={table.id} onClick={handleClick}>
+                            <rect
+                                x={table.x}
+                                y={table.y}
+                                width={table.width}
+                                height={table.height}
+                                rx={4}
+                                {...commonProps}
+                            />
+                            <text
+                                x={cx}
+                                y={cy}
+                                dy="0.35em"
+                                textAnchor="middle"
+                                className={clsx(
+                                    "text-sm font-bold pointer-events-none select-none",
+                                    isSelected ? "fill-white" :
+                                        (status === "OCCUPIED" && isAdminView) ? "fill-amber-900" :
+                                            (status === "RESERVED" && isAdminView) ? "fill-purple-900" :
+                                                "fill-slate-900"
+                                )}
+                            >
+                                {table.id.replace(/[A-Z]/g, "")}
+                            </text>
+                        </g>
+                    );
+                })}
+            </svg>
+            <div className="p-4 bg-white/80 backdrop-blur-sm flex flex-wrap items-center justify-center gap-4 text-xs font-semibold border-t border-slate-200">
+                {/* Legend */}
+                {layout.name === "Floor View" ? (
+                    // Admin Legend
+                    <>
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-white border border-slate-200 shadow-sm" />
+                            <span className="text-xs font-medium text-slate-600">Available</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-amber-50 border border-amber-200 shadow-sm" />
+                            <span className="text-xs font-medium text-slate-600">Occupied</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-purple-50 border border-purple-200 shadow-sm" />
+                            <span className="text-xs font-medium text-slate-600">Reserved</span>
+                        </div>
+                    </>
+                ) : (
+                    // User Legend
+                    <>
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-white border border-slate-200 shadow-sm" />
+                            <span className="text-xs font-medium text-slate-600">Available</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-slate-100 border border-slate-200" />
+                            <span className="text-xs font-medium text-slate-600">Unavailable</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-blue-600 shadow-sm" />
+                            <span className="text-xs font-medium text-slate-600">Your Selection</span>
+                        </div>
+                    </>
+                )}
+            </div>
+        </div>
+    );
+}

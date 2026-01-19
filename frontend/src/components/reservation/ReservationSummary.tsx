@@ -1,0 +1,50 @@
+import type { ReservationResponse } from "../../api/reservations.api";
+import { formatTimeWindow } from "../../utils/time";
+import clsx from "clsx";
+
+type ReservationSummaryProps = {
+  reservation: ReservationResponse;
+};
+
+export default function ReservationSummary({ reservation }: ReservationSummaryProps) {
+  const shortId = reservation.reservationId?.slice(0, 8) || "—";
+  const status = reservation.status ?? "UNKNOWN";
+  const statusClass =
+    status === "CONFIRMED"
+      ? "bg-green-100 text-green-800"
+      : status === "PENDING_DEPOSIT"
+      ? "bg-amber-100 text-amber-800"
+      : "bg-slate-200 text-slate-800";
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm text-slate-500">Reservation ID</p>
+          <p className="text-xl font-semibold">{shortId}</p>
+        </div>
+        <span className={clsx("px-3 py-1 rounded-full text-sm font-medium", statusClass)}>
+          {status}
+        </span>
+      </div>
+      {reservation.tableIds && reservation.startTime && reservation.endTime ? (
+        <div className="space-y-2">
+          <div>
+            <p className="text-sm text-slate-500">Tables</p>
+            <p className="text-lg font-medium">{reservation.tableIds.join(", ")}</p>
+          </div>
+          <div>
+            <p className="text-sm text-slate-500">Time</p>
+            <p className="text-lg font-medium">
+              {formatTimeWindow(reservation.startTime, reservation.endTime)}
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="rounded-md bg-amber-50 p-3 text-amber-700">
+          Details unavailable — check system.
+        </div>
+      )}
+    </div>
+  );
+}

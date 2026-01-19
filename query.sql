@@ -1,0 +1,1 @@
+SELECT id, type, x, y FROM "Table" WHERE id IN ('11', '12', '13') ORDER BY x;
