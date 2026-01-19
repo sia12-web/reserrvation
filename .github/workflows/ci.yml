@@ -30,6 +30,8 @@ jobs:
 
     - name: Test Backend
       run: npm run test
+      env:
+        ADMIN_PIN: "1234"
 
     - name: Install Frontend Dependencies
       working-directory: ./frontend
