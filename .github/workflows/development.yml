@@ -1,13 +1,13 @@
-name: CI
+name: Development Build & Test
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ "dev", "development", "feature/*" ]
   pull_request:
-    branches: [ "main", "master" ]
+    types: [opened, synchronize, reopened]
 
 jobs:
-  build-and-test:
+  dev-check:
     runs-on: ubuntu-latest
 
     steps:
@@ -37,6 +37,6 @@ jobs:
       working-directory: ./frontend
       run: npm ci
 
-    - name: Build Frontend (Type Check + Vite Build)
+    - name: Build Frontend
       working-directory: ./frontend
       run: npm run build
