@@ -84,7 +84,7 @@ export default function ReservationsList() {
                 to: endOfDay
             });
         },
-        refetchInterval: 30000,
+        refetchInterval: 15000,
     });
 
     const filtered = (reservations || []).filter((r: ReservationAdmin) =>

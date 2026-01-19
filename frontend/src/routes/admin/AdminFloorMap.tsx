@@ -18,7 +18,7 @@ export default function AdminFloorMap() {
     const { data: floor, isLoading } = useQuery({
         queryKey: ["admin_floor_state", selectedDate],
         queryFn: () => fetchFloorState(selectedDate),
-        refetchInterval: 10000,
+        refetchInterval: 5000,
     });
 
     const isToday = selectedDate === new Date().toISOString().split('T')[0];

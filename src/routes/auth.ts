@@ -24,14 +24,14 @@ router.post(
         }
 
         const token = jwt.sign({ role: "ADMIN" }, env.jwtSecret, {
-            expiresIn: "8h",
+            expiresIn: "24h",
         });
 
         res.cookie("admin_token", token, {
             httpOnly: true,
             secure: env.nodeEnv === "production",
             sameSite: "strict",
-            maxAge: 8 * 60 * 60 * 1000, // 8 hours
+            maxAge: 24 * 60 * 60 * 1000, // 24 hours
         });
 
         res.json({ message: "Login successful" });
