@@ -1,0 +1,29 @@
+{
+    "project": {
+        "name": "ClassmateFinder",
+        "description": "A platform for students to find classmates and study groups."
+    },
+    "stack": {
+        "languages": [
+            "TypeScript",
+            "Node.js"
+        ],
+        "frameworks": [
+            "React",
+            "Express",
+            "Prisma"
+        ],
+        "tools": [
+            "Vite",
+            "Jest"
+        ]
+    },
+    "paths": {
+        "source_root": "./src",
+        "tests_root": "./tests",
+        "docs_root": "./docs"
+    },
+    "conventions": {
+        "commit_style": "conventional"
+    }
+}

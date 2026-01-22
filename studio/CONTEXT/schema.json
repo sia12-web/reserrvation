@@ -1,0 +1,87 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Studio Project Context",
+    "description": "Configuration and context for the Agent Studio Orchestrator.",
+    "type": "object",
+    "properties": {
+        "project": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "domain": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name"
+            ]
+        },
+        "stack": {
+            "type": "object",
+            "description": "Technology stack definitions for the agents to respect",
+            "properties": {
+                "languages": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "frameworks": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "tools": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "paths": {
+            "type": "object",
+            "description": "Critical paths for agents to be aware of",
+            "properties": {
+                "source_root": {
+                    "type": "string",
+                    "default": "./src"
+                },
+                "tests_root": {
+                    "type": "string",
+                    "default": "./tests"
+                },
+                "docs_root": {
+                    "type": "string",
+                    "default": "./docs"
+                }
+            }
+        },
+        "conventions": {
+            "type": "object",
+            "properties": {
+                "commit_style": {
+                    "type": "string",
+                    "enum": [
+                        "conventional",
+                        "freeform"
+                    ],
+                    "default": "conventional"
+                },
+                "test_runner": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "required": [
+        "project",
+        "stack"
+    ]
+}

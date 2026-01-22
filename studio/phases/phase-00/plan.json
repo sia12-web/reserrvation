@@ -1,0 +1,133 @@
+{
+  "phase": "Phase 0 - Foundation & Standards",
+  "goal": "Add baseline project guardrails for consistency in future phases",
+  "steps": [
+    {
+      "id": "1",
+      "title": "Add linting and formatting tooling",
+      "tasks": [
+        "Create .eslintrc.json with TypeScript rules",
+        "Create .prettierrc with project style",
+        "Create .prettierignore"
+      ],
+      "acceptance_criteria": [
+        "ESLint runs without errors on src/",
+        "Prettier formats TypeScript files consistently",
+        "Configuration files are committed to repo"
+      ],
+      "status": "completed"
+    },
+    {
+      "id": "2",
+      "title": "Add testing dependencies",
+      "tasks": [
+        "Add Jest, ts-jest, @types/jest to package.json",
+        "Add supertest, @types/supertest for API testing",
+        "Add zod for environment validation"
+      ],
+      "acceptance_criteria": [
+        "All testing dependencies in package.json",
+        "Dependencies are version-pinned"
+      ],
+      "status": "completed"
+    },
+    {
+      "id": "3",
+      "title": "Implement environment validation",
+      "tasks": [
+        "Create src/config/env.ts with Zod schema",
+        "Update src/config/index.ts to export validated env",
+        "Update all files to use env instead of config",
+        "Add fail-fast error messages for invalid env"
+      ],
+      "acceptance_criteria": [
+        "Server exits with clear error if env vars missing/invalid",
+        "All env vars are type-safe",
+        "Zod schema validates on startup"
+      ],
+      "status": "completed"
+    },
+    {
+      "id": "4",
+      "title": "Add health check endpoint",
+      "tasks": [
+        "Update /health route in app.ts if needed",
+        "Ensure no auth required",
+        "Return status, timestamp, and environment"
+      ],
+      "acceptance_criteria": [
+        "GET /health returns 200 with required fields",
+        "Endpoint is accessible without authentication"
+      ],
+      "status": "completed"
+    },
+    {
+      "id": "5",
+      "title": "Create smoke tests",
+      "tasks": [
+        "Create jest.config.js",
+        "Create tests/health.test.ts",
+        "Implement test that boots app and hits /health"
+      ],
+      "acceptance_criteria": [
+        "Test boots Express app",
+        "Test hits /health endpoint",
+        "Test validates response structure",
+        "Test runs with 'npm test'"
+      ],
+      "status": "completed"
+    },
+    {
+      "id": "6",
+      "title": "Update package.json scripts",
+      "tasks": [
+        "Add test script",
+        "Add test:watch script",
+        "Add test:coverage script",
+        "Ensure dev, build, start, lint, format exist"
+      ],
+      "acceptance_criteria": [
+        "npm test runs Jest",
+        "npm run lint runs ESLint",
+        "npm run format runs Prettier",
+        "All scripts work correctly"
+      ],
+      "status": "completed"
+    },
+    {
+      "id": "7",
+      "title": "Update documentation",
+      "tasks": [
+        "Update backend/README.md with setup instructions",
+        "Document environment variables",
+        "Document Prisma commands",
+        "Document testing commands"
+      ],
+      "acceptance_criteria": [
+        "README has env var section",
+        "README has Prisma setup section",
+        "README has testing section",
+        "Instructions are complete and accurate"
+      ],
+      "status": "completed"
+    },
+    {
+      "id": "8",
+      "title": "Create ADR documents",
+      "tasks": [
+        "Create studio/ADR/ADR-0001-auth-jwt.md",
+        "Create studio/ADR/ADR-0002-email-verification.md",
+        "Create studio/ADR/ADR-0003-university-domain-validation.md",
+        "Create studio/ADR/ADR-0004-socket-auth.md"
+      ],
+      "acceptance_criteria": [
+        "All 4 ADRs exist in studio/ADR/",
+        "Each ADR follows standard format",
+        "Decisions are documented with context and consequences"
+      ],
+      "status": "completed"
+    }
+  ],
+  "overall_status": "completed",
+  "completion_date": "2026-01-21"
+}

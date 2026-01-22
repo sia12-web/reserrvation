@@ -1,0 +1,216 @@
+{
+  "plan_id": "phase1-auth-spec-20250122",
+  "phase": "Phase 1 - Spec & Contract First",
+  "title": "Authentication Foundation with Email Verification and Canadian University Domain Validation",
+  "context_requirements": [
+    "Existing auth scaffolded (register/login with JWT)",
+    "ADR-0001 through ADR-0004 define high-level approach",
+    "OpenAPI contract minimal (only health check)",
+    "User model exists but missing emailVerified field",
+    "NO backend implementation in this phase"
+  ],
+  "steps": [
+    {
+      "id": "1",
+      "role": "Planner",
+      "model": "Sonnet",
+      "depends_on": [],
+      "inputs": ["studio/AGENT_WORKFLOW.md", "studio/phases/phase-00/README.md"],
+      "outputs": ["studio/PLANS/phase1-auth/plan.json"],
+      "risk_level": "low",
+      "task": "Create dependency-ordered plan.json for Phase 1 authentication specification",
+      "acceptance_criteria": [
+        "plan.json exists with all 8 steps defined",
+        "Each step has role, model, depends_on, inputs, outputs",
+        "Risk levels assigned appropriately",
+        "No implementation steps included (spec-only)"
+      ],
+      "test_plan": [
+        "Verify JSON is valid and parseable",
+        "Confirm all dependencies form valid DAG",
+        "Check no step references backend implementation"
+      ],
+      "rollback_plan": "Delete plan.json and restart planning step"
+    },
+    {
+      "id": "2",
+      "role": "Architect",
+      "model": "Sonnet",
+      "depends_on": ["1"],
+      "inputs": ["studio/ADR/ADR-0001-auth-jwt.md", "studio/ADR/ADR-0002-email-verification.md"],
+      "outputs": ["studio/ADR/ADR-0005-auth-flow.md"],
+      "risk_level": "high",
+      "task": "Create ADR-0005 deciding auth flow: login allowed before email verification? Account states and access control enforcement",
+      "acceptance_criteria": [
+        "Explicit decision on login before/after verification",
+        "Account states defined (PENDING_VERIFICATION, ACTIVE)",
+        "Clear list of what's blocked until verification",
+        "Clear list of what's allowed before verification",
+        "No vague language or TODOs"
+      ],
+      "test_plan": [
+        "Verify decision is explicit and implementable",
+        "Confirm account state transitions are clear",
+        "Check access control rules are comprehensive"
+      ],
+      "rollback_plan": "Revise ADR-0005 with different decision if needed"
+    },
+    {
+      "id": "3",
+      "role": "Architect",
+      "model": "Sonnet",
+      "depends_on": ["2"],
+      "inputs": ["studio/ADR/ADR-0002-email-verification.md"],
+      "outputs": ["studio/ADR/ADR-0006-email-verification-token-storage.md"],
+      "risk_level": "high",
+      "task": "Create ADR-0006 deciding token generation, storage (hashed vs plaintext), expiry duration, and resend rules",
+      "acceptance_criteria": [
+        "Token generation method specified (high-entropy)",
+        "Storage approach explicit: HASHED in DB, never plaintext",
+        "Expiry duration specified with rationale",
+        "Resend rules explicit: invalidate old vs allow multiple",
+        "Hashing algorithm specified (bcrypt, rounds)"
+      ],
+      "test_plan": [
+        "Verify security decision (hashed storage) is clear",
+        "Confirm token expiry is reasonable (24 hours)",
+        "Check resend behavior doesn't allow abuse"
+      ],
+      "rollback_plan": "Revise ADR-0006 with different storage approach if security concern"
+    },
+    {
+      "id": "4",
+      "role": "Architect",
+      "model": "Sonnet",
+      "depends_on": ["2"],
+      "inputs": ["studio/ADR/ADR-0003-university-domain-validation.md"],
+      "outputs": ["studio/ADR/ADR-0007-university-domain-validation.md"],
+      "risk_level": "medium",
+      "task": "Create ADR-0007 deciding Canadian university domain validation: allowlist method, fallback strategy, error semantics to prevent enumeration",
+      "acceptance_criteria": [
+        "Validation method specified (allowlist)",
+        "Canadian university domains examples provided",
+        "Fallback strategy clear for unknown domains",
+        "Error semantics prevent user enumeration",
+        "Implementation location specified (domainValidator.ts)"
+      ],
+      "test_plan": [
+        "Verify allowlist approach is implementable",
+        "Confirm error messages don't reveal registered emails",
+        "Check Canadian universities are well-represented"
+      ],
+      "rollback_plan": "Revise ADR-0007 with different validation method if too restrictive"
+    },
+    {
+      "id": "5",
+      "role": "Architect",
+      "model": "Sonnet",
+      "depends_on": ["2"],
+      "inputs": ["studio/ADR/ADR-0004-socket-auth.md"],
+      "outputs": ["studio/ADR/ADR-0008-socket-auth-handshake.md"],
+      "risk_level": "medium",
+      "task": "Create ADR-0008 deciding Socket.IO authentication handshake: JWT passing method, verification state enforcement, room access rules",
+      "acceptance_criteria": [
+        "JWT passing method explicit (handshake.auth.token)",
+        "Decision on unverified user connections (reject/allow)",
+        "Room access rules specified at high level",
+        "Error handling for auth failures defined"
+      ],
+      "test_plan": [
+        "Verify handshake auth method is clear",
+        "Confirm verification state enforcement is explicit",
+        "Check room access rules are implementable"
+      ],
+      "rollback_plan": "Revise ADR-0008 if WebSocket requirements unclear"
+    },
+    {
+      "id": "6",
+      "role": "Contractor",
+      "model": "Sonnet",
+      "depends_on": ["2", "3", "4", "5"],
+      "inputs": ["studio/ADR/ADR-0005-auth-flow.md", "studio/ADR/ADR-0006-email-verification-token-storage.md", "studio/ADR/ADR-0007-university-domain-validation.md", "studio/ADR/ADR-0008-socket-auth-handshake.md"],
+      "outputs": ["studio/CONTRACTS/openapi.yaml"],
+      "risk_level": "medium",
+      "task": "Update OpenAPI contract with all auth endpoints: register, verify-email, login, resend-verification, including schemas and error responses",
+      "acceptance_criteria": [
+        "All 4 endpoints specified with full details",
+        "Request/response schemas defined and referenced",
+        "ErrorResponse component used consistently",
+        "Error codes enumerated and used correctly",
+        "Examples provided for each endpoint",
+        "Auth requirements documented per endpoint"
+      ],
+      "test_plan": [
+        "Validate OpenAPI syntax with Redocly CLI",
+        "Check all endpoints reference ErrorResponse",
+        "Verify error codes are from enumerated set",
+        "Confirm request/response schemas are complete"
+      ],
+      "rollback_plan": "Revert openapi.yaml to previous version"
+    },
+    {
+      "id": "7",
+      "role": "Security",
+      "model": "Sonnet",
+      "depends_on": ["6"],
+      "inputs": ["studio/CONTRACTS/openapi.yaml", "studio/ADR/ADR-0005-auth-flow.md", "studio/ADR/ADR-0006-email-verification-token-storage.md"],
+      "outputs": ["studio/RUNS/20250121-1200-phase1-auth/phase1_security_notes.md"],
+      "risk_level": "medium",
+      "task": "Create spec-level security notes covering enumeration prevention, brute force mitigation, token replay prevention, and JWT security considerations",
+      "acceptance_criteria": [
+        "Enumeration risks identified and mitigations specified",
+        "Brute force risks addressed with rate limiting recommendations",
+        "Token replay prevention specified (one-time use)",
+        "JWT security notes included (secret, expiry, rotation)",
+        "Short, actionable, spec-level (not implementation)"
+      ],
+      "test_plan": [
+        "Verify all major security concerns are addressed",
+        "Check mitigations are actionable for Phase 2",
+        "Confirm notes are spec-level only"
+      ],
+      "rollback_plan": "Revise security notes if missing critical concerns"
+    },
+    {
+      "id": "8",
+      "role": "PhaseVerifier",
+      "model": "Sonnet",
+      "depends_on": ["6", "7"],
+      "inputs": ["studio/PLANS/phase1-auth/plan.json", "studio/CONTRACTS/openapi.yaml", "studio/ADR/ADR-0005-auth-flow.md", "studio/ADR/ADR-0006-email-verification-token-storage.md", "studio/ADR/ADR-0007-university-domain-validation.md", "studio/ADR/ADR-0008-socket-auth-handshake.md", "studio/RUNS/20250121-1200-phase1-auth/phase1_security_notes.md"],
+      "outputs": ["studio/RUNS/20250121-1200-phase1-auth/phase1_summary.md"],
+      "risk_level": "low",
+      "task": "Create phase1_summary.md with PhaseVerifier section: OpenAPI validation steps, consistency checklist, readiness checklist, and verdict criteria",
+      "acceptance_criteria": [
+        "PhaseVerifier section titled exactly 'How to Verify Phase 1'",
+        "OpenAPI validation command provided (Redocly CLI)",
+        "Consistency checklist includes ErrorResponse, error codes, ADR alignment",
+        "Readiness checklist confirms Phase 2 can implement",
+        "Verdict criteria explicit (PASS conditions)",
+        "Summary of all artifacts included"
+      ],
+      "test_plan": [
+        "Verify Redocly CLI command is correct",
+        "Run validation checklist manually",
+        "Confirm all ADRs have explicit decisions",
+        "Check OpenAPI contract is complete"
+      ],
+      "rollback_plan": "Revise summary if verification steps incomplete"
+    }
+  ],
+  "acceptance_criteria": [
+    "plan.json exists with dependency-ordered steps",
+    "4 new ADRs (ADR-0005 through ADR-0008) with explicit decisions",
+    "OpenAPI contract updated with all auth endpoints",
+    "Security notes created covering spec-level concerns",
+    "phase1_summary.md includes PhaseVerifier section",
+    "NO backend code was modified (spec-only phase)"
+  ],
+  "forbidden": [
+    "Do NOT edit backend/src/** code",
+    "Do NOT modify backend/prisma/schema.prisma",
+    "Do NOT add dependencies to backend/package.json",
+    "Do NOT create migrations",
+    "Do NOT implement endpoints or handlers"
+  ],
+  "run_id": "20250122-1200-phase1-auth"
+}

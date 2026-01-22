@@ -1,0 +1,39 @@
+# Documentation Policy
+
+This policy defines when documentation updates are required and where they should live.
+
+## Requirement Triggers
+The Documentation Agent MUST be triggered when:
+- **Task Type** is `feature`, `refactor`, `integration`, or `release`.
+- **Conditions** (any):
+    - OpenAPI/contract changed.
+    - A new module/service was added.
+    - Environment variables changed.
+    - User-facing behavior changed.
+    - Release is being prepared.
+
+## Required Sections per Change Type
+
+### API Changes
+- Update: `/docs/api/endpoints.md`
+- Requirement: Example request/response matching schema.
+
+### Environment Variables
+- Update: `/docs/setup/env_vars.md`
+- Requirement: Default values, sensitivity level, description.
+
+### New Feature
+- Update: `/docs/features/<feature_name>.md`
+- Requirement: User story, usage flow, configuration.
+
+### Migration
+- Update: `/docs/runbooks/migrations.md`
+- Requirement: Backward compatibility notes, rollback steps.
+
+### Rollout / Release
+- Update: `/docs/releases/<version>.md`
+- Requirement: Changelog, known issues.
+
+## Conventions
+- **Format:** Markdown
+- **Style:** Clear, concise, imperative mood for instructions.

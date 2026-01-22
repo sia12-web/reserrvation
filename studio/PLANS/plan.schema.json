@@ -1,0 +1,119 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Orchestration Plan",
+    "type": "object",
+    "properties": {
+        "plan_id": {
+            "type": "string",
+            "format": "uuid"
+        },
+        "goal": {
+            "type": "string"
+        },
+        "context_requirements": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "steps": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "role": {
+                        "type": "string"
+                    },
+                    "model": {
+                        "type": "string"
+                    },
+                    "depends_on": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "task_type": {
+                        "type": "string",
+                        "enum": [
+                            "planning",
+                            "architecture",
+                            "implementation",
+                            "review",
+                            "test",
+                            "ux",
+                            "security"
+                        ]
+                    },
+                    "risk_level": {
+                        "type": "string",
+                        "enum": [
+                            "low",
+                            "medium",
+                            "high",
+                            "critical"
+                        ]
+                    },
+                    "inputs": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "outputs": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "task": {
+                        "type": "string"
+                    },
+                    "acceptance_criteria": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "minItems": 1
+                    },
+                    "test_plan": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "rollback_plan": {
+                        "type": "string"
+                    },
+                    "review_gates": {
+                        "type": "object",
+                        "properties": {
+                            "must_run_security": {
+                                "type": "boolean"
+                            },
+                            "must_run_integration": {
+                                "type": "boolean"
+                            }
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "role",
+                    "depends_on",
+                    "task",
+                    "acceptance_criteria",
+                    "outputs",
+                    "risk_level"
+                ]
+            }
+        }
+    },
+    "required": [
+        "plan_id",
+        "steps"
+    ]
+}

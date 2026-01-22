@@ -1,0 +1,40 @@
+strategies:
+  - conditions:
+      risk_level: high
+    primary_model: Claude
+    secondary_model: Codex (GPT)
+    review_requirements:
+      - security_agent
+      - manual_approval
+
+  - conditions:
+      task_type: ux
+    primary_model: Gemini
+    secondary_model: Claude
+
+  - conditions:
+      task_type: implementation
+      risk_level: low
+    primary_model: GLM
+    secondary_model: null
+    escalation_model: Codex (GPT)
+
+  - conditions:
+      task_type: implementation
+      risk_level: medium
+    primary_model: GLM
+    secondary_model: Codex (GPT)
+
+  - conditions:
+      task_type: planning
+    primary_model: Codex (GPT)
+    secondary_model: Claude
+
+  - conditions:
+      doc_trigger: true
+    primary_model: Gemini
+    secondary_model: Codex (GPT)
+
+defaults:
+  primary_model: Codex (GPT)
+  secondary_model: null

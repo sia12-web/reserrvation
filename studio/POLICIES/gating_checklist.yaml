@@ -1,0 +1,37 @@
+# Studio Gating Checklist
+
+The Reviewer Agent MUST enforce these checks before approving any step.
+
+## Correctness
+- [ ] Does the code match the task description exactly?
+- [ ] Are all acceptance criteria met?
+- [ ] Is the logic sound?
+
+## Security
+- [ ] Are inputs validated?
+- [ ] Are secrets excluded from code/commits?
+- [ ] Is authorization checked?
+- [ ] Are new dependencies vetted?
+
+## API Compatibility
+- [ ] Does the implementation match the contract (openapi.yaml)?
+- [ ] Are breaking changes avoided or explicitly versioned?
+
+## Tests
+- [ ] Are unit tests included?
+- [ ] Do tests pass locally?
+- [ ] Are edge cases covered?
+
+## UX (if applicable)
+- [ ] Does the UI match the UX flow?
+- [ ] Is the copy consistent?
+- [ ] Is the design responsive?
+
+## Documentation
+- [ ] Are docs updated per `/studio/POLICIES/docs_policy.yaml`?
+- [ ] Do examples match the implementation?
+
+## Operations
+- [ ] Are logs/metrics included?
+- [ ] Is the database migration safe (backward compatible)?
+- [ ] Is there a rollback plan?
