@@ -6,6 +6,7 @@ import { env } from './config';
 import { errorHandler } from './middleware/errorHandler';
 import { notFoundHandler } from './middleware/notFoundHandler';
 import { setupSocketIO } from './config/socket';
+import { globalLimiter } from './middleware/rateLimiter';
 
 // Import routes
 import authRoutes from './routes/auth.routes';
@@ -45,6 +46,9 @@ app.get('/health', (_req, res) => {
     environment: env.NODE_ENV,
   });
 });
+
+// Global rate limiting for API routes
+app.use('/api/', globalLimiter);
 
 // API routes
 app.use('/api/auth', authRoutes);

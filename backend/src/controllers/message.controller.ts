@@ -1,15 +1,15 @@
 import { Request, Response } from 'express';
 import prisma from '../config/database';
 
-export const getMessages = async (req: Request, res: Response) => {
+export const getMessages = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { courseId, receiverId, limit = 50, offset = 0 } = req.query;
+    const { courseId, limit = 50, offset = 0 } = req.query;
 
     const messages = await prisma.message.findMany({
       where: {
         OR: [
-          { senderId: req.userId },
-          { receiverId: req.userId },
+          { senderId: req.userId as string },
+          { receiverId: req.userId as string },
           courseId ? { courseId: courseId as string } : {},
         ].filter((condition): condition is any => Object.keys(condition).length > 0),
       },
@@ -52,14 +52,14 @@ export const getMessages = async (req: Request, res: Response) => {
   }
 };
 
-export const createMessage = async (req: Request, res: Response) => {
+export const createMessage = async (req: Request, res: Response): Promise<void> => {
   try {
     const { content, receiverId, courseId } = req.body;
 
     const message = await prisma.message.create({
       data: {
         content,
-        senderId: req.userId!,
+        senderId: req.userId as string,
         receiverId,
         courseId,
       },
@@ -99,14 +99,15 @@ export const createMessage = async (req: Request, res: Response) => {
   }
 };
 
-export const markAsRead = async (req: Request, res: Response) => {
+export const markAsRead = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
+    const messageId = id as string;
 
     const message = await prisma.message.updateMany({
       where: {
-        id,
-        receiverId: req.userId,
+        id: messageId,
+        receiverId: req.userId as string,
       },
       data: {
         read: true,
@@ -120,23 +121,23 @@ export const markAsRead = async (req: Request, res: Response) => {
   }
 };
 
-export const getConversations = async (req: Request, res: Response) => {
+export const getConversations = async (req: Request, res: Response): Promise<void> => {
   try {
     // Get all unique conversations where user is either sender or receiver
     const sentMessages = await prisma.message.findMany({
-      where: { senderId: req.userId },
+      where: { senderId: req.userId as string },
       select: { receiverId: true },
       distinct: ['receiverId'],
     });
 
     const receivedMessages = await prisma.message.findMany({
-      where: { receiverId: req.userId },
+      where: { receiverId: req.userId as string },
       select: { senderId: true },
       distinct: ['senderId'],
     });
 
     const userIds = new Set([
-      ...sentMessages.map((m) => m.receiverId).filter(Boolean),
+      ...sentMessages.map((m) => m.receiverId).filter((id): id is string => id !== null),
       ...receivedMessages.map((m) => m.senderId),
     ]);
 
@@ -157,8 +158,8 @@ export const getConversations = async (req: Request, res: Response) => {
         const lastMessage = await prisma.message.findFirst({
           where: {
             OR: [
-              { senderId: req.userId, receiverId: user.id },
-              { senderId: user.id, receiverId: req.userId },
+              { senderId: req.userId as string, receiverId: user.id },
+              { senderId: user.id, receiverId: req.userId as string },
             ],
           },
           orderBy: { createdAt: 'desc' },

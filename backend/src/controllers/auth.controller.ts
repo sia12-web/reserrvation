@@ -39,9 +39,13 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     });
 
     if (existingUser) {
-      res.status(400).json({
-        code: 'EMAIL_EXISTS',
-        message: 'User with this email or username already exists',
+      // GENERIC RESPONSE TO PREVENT ENUMERATION
+      // Log internally for monitoring but don't reveal to user
+      console.log(`Registration attempt with existing email: ${email}`);
+      res.status(201).json({
+        user: null,
+        requiresVerification: true,
+        message: 'If your account exists, you will receive a verification email.',
       });
       return;
     }
@@ -112,6 +116,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     });
 
     if (!user) {
+      // TIMING-SAFE: Always perform bcrypt comparison to prevent timing attacks
+      await bcrypt.compare(password, '$2a$10$dummy.hash.for.timing.attack');
       res.status(401).json({
         code: 'INVALID_CREDENTIALS',
         message: 'Invalid email or password',
@@ -130,11 +136,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // Check email verification
+    // Check email verification - GENERIC RESPONSE
     if (!user.emailVerified) {
+      // Log internally for debugging but don't reveal to user
+      console.log(`Login attempt for unverified user: ${email}`);
       res.status(401).json({
-        code: 'EMAIL_NOT_VERIFIED',
-        message: 'Please verify your email before logging in',
+        code: 'INVALID_CREDENTIALS',
+        message: 'Invalid email or password',
       });
       return;
     }

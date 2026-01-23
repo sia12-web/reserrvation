@@ -34,12 +34,13 @@ export const getCourses = async (req: Request, res: Response) => {
   }
 };
 
-export const getCourseById = async (req: Request, res: Response) => {
+export const getCourseById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
+    const courseId = id as string;
 
     const course = await prisma.course.findUnique({
-      where: { id },
+      where: { id: courseId },
       include: {
         enrollments: {
           include: {
@@ -60,7 +61,8 @@ export const getCourseById = async (req: Request, res: Response) => {
     });
 
     if (!course) {
-      return res.status(404).json({ error: 'Course not found' });
+      res.status(404).json({ error: 'Course not found' });
+      return;
     }
 
     res.json(course);
@@ -90,15 +92,16 @@ export const createCourse = async (req: Request, res: Response) => {
   }
 };
 
-export const enrollInCourse = async (req: Request, res: Response) => {
+export const enrollInCourse = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
+    const courseId = id as string;
     const { semester, year } = req.body;
 
     const enrollment = await prisma.courseEnrollment.create({
       data: {
-        userId: req.userId!,
-        courseId: id,
+        userId: req.userId as string,
+        courseId: courseId,
         semester,
         year,
       },
@@ -114,14 +117,15 @@ export const enrollInCourse = async (req: Request, res: Response) => {
   }
 };
 
-export const unenrollFromCourse = async (req: Request, res: Response) => {
+export const unenrollFromCourse = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
+    const courseId = id as string;
 
     await prisma.courseEnrollment.deleteMany({
       where: {
-        userId: req.userId,
-        courseId: id,
+        userId: req.userId as string,
+        courseId: courseId,
       },
     });
 
@@ -132,12 +136,13 @@ export const unenrollFromCourse = async (req: Request, res: Response) => {
   }
 };
 
-export const getCourseStudents = async (req: Request, res: Response) => {
+export const getCourseStudents = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
+    const courseId = id as string;
 
     const enrollments = await prisma.courseEnrollment.findMany({
-      where: { courseId: id },
+      where: { courseId: courseId },
       include: {
         user: {
           select: {
