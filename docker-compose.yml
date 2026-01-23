@@ -50,6 +50,11 @@ services:
       SMTP_HOST: mailhog
       SMTP_PORT: 1025
       PORT: 3000
+      ALLOWED_ORIGINS: http://localhost:5173
+      STRIPE_SECRET_KEY: sk_test_placeholder
+      STRIPE_WEBHOOK_SECRET: whsec_placeholder
+      JWT_SECRET: super-secret
+      ADMIN_PIN: "1234"
     ports:
       - "3000:3000" # Use 3001 externally to avoid conflict with local backend
     depends_on:

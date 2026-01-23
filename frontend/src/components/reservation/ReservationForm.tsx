@@ -381,6 +381,7 @@ export default function ReservationForm({
                   }
 
                   // Capacity check (Global)
+                  // Capacity check (Global)
                   if (partySize > table.maxCapacity && !isOverflow) {
                     setFormError(`Table ${id} only seats up to ${table.maxCapacity} people.`);
                     return;
@@ -398,9 +399,7 @@ export default function ReservationForm({
                   }
 
                   setSelectedTableIds((prev) =>
-                    prev.includes(id)
-                      ? prev.filter((t) => t !== id)
-                      : [...prev, id]
+                    prev.includes(id) ? [] : [id]
                   );
                 }}
               />

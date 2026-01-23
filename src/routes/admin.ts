@@ -191,7 +191,13 @@ router.get(
             let status = "AVAILABLE";
             if (tableReservations.length > 0) {
                 const isActiveNow = tableReservations.some(r =>
-                    new Date(r.startTime) <= now && new Date(r.endTime) >= now &&
+                    // Active if:
+                    // 1. Time window covers NOW (Standard)
+                    // 2. OR status is CHECKED_IN (Guest is physically here, even if early)
+                    (
+                        (new Date(r.startTime) <= now && new Date(r.endTime) >= now) ||
+                        (r.status === 'CHECKED_IN' && new Date(r.endTime) >= now)
+                    ) &&
                     ['CONFIRMED', 'CHECKED_IN'].includes(r.status)
                 );
                 status = isActiveNow ? "OCCUPIED" : "RESERVED";
@@ -378,10 +384,6 @@ router.post(
                 return created;
             });
 
-            res.status(201).json({
-                ...reservation,
-                tableIds,
-            });
             res.status(201).json({
                 ...reservation,
                 tableIds,
@@ -624,8 +626,10 @@ router.post(
                 tableId: tableId as string,
                 reservation: {
                     status: { in: ["CONFIRMED", "CHECKED_IN"] },
-                    startTime: { lte: now },
-                    endTime: { gte: now },
+                    OR: [
+                        { startTime: { lte: now }, endTime: { gte: now } },
+                        { status: "CHECKED_IN", endTime: { gte: now } }
+                    ]
                 },
             },
             include: {

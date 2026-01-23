@@ -192,24 +192,24 @@ export default function ReservationsList() {
                     <table className="w-full text-left">
                         <thead>
                             <tr className="bg-slate-50 border-b border-slate-100">
-                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">ID</th>
-                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Guest</th>
-                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Time</th>
-                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Party</th>
-                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Tables</th>
-                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
+                                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">ID</th>
+                                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Guest</th>
+                                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Time</th>
+                                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Party</th>
+                                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Tables</th>
+                                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {filtered.map((res: ReservationAdmin) => (
                                 <tr key={res.id} className="hover:bg-slate-50/80 transition-colors group">
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="px-4 py-3 whitespace-nowrap">
                                         <span className="font-mono text-xs font-bold bg-slate-100 px-2 py-1 rounded text-slate-600">
                                             #{res.shortId}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4">
+                                    <td className="px-4 py-3">
                                         <div className="flex flex-col">
                                             <span className="font-bold text-slate-900">{res.clientName}</span>
                                             <div className="flex items-center gap-3 text-slate-500 text-xs mt-1">
@@ -217,19 +217,19 @@ export default function ReservationsList() {
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                    <td className="px-4 py-3 whitespace-nowrap text-sm">
                                         <div className="flex flex-col">
                                             <span className="font-semibold">{dayjs(res.startTime).format("MMM D, YYYY")}</span>
                                             <span className="text-slate-500">{dayjs(res.startTime).format("HH:mm")} - {dayjs(res.endTime).format("HH:mm")}</span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="px-4 py-3 whitespace-nowrap">
                                         <div className="flex items-center gap-1.5 font-bold text-slate-700">
                                             <Users className="w-4 h-4 text-slate-400" />
                                             {res.partySize}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="px-4 py-3 whitespace-nowrap">
                                         <div className="flex flex-wrap gap-1 max-w-[150px]">
                                             {res.tableIds.map((tid: string) => (
                                                 <span key={tid} className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full text-[10px] font-bold border border-blue-100">
@@ -238,12 +238,12 @@ export default function ReservationsList() {
                                             ))}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="px-4 py-3 whitespace-nowrap">
                                         <StatusBadge status={res.status} />
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
                                         <div className="flex gap-2">
-                                            {["CONFIRMED", "CHECKED_IN", "PENDING_DEPOSIT"].includes(res.status) && (
+                                            {["CONFIRMED", "PENDING_DEPOSIT"].includes(res.status) && (
                                                 <button
                                                     onClick={() => { setSelectedResId(res.id); setIsCancelModalOpen(true); }}
                                                     className="text-red-600 hover:text-red-900 font-bold px-3 py-1.5 rounded-lg hover:bg-red-50 transition-all border border-transparent hover:border-red-100"

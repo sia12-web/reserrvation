@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, CalendarDays, LogOut } from "lucide-react";
+import { LayoutDashboard, CalendarDays, LogOut, Menu, X } from "lucide-react";
 import PromptSystem from "../../components/admin/PromptSystem";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const location = useLocation();
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const handleLogout = () => {
         localStorage.removeItem("admin_pin");
@@ -18,19 +19,40 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     return (
         <div className="min-h-screen bg-slate-50 flex">
+            {/* Mobile Overlay */}
+            {isMobileMenuOpen && (
+                <div
+                    className="fixed inset-0 bg-black/50 z-40 md:hidden"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                />
+            )}
+
             {/* Sidebar */}
-            <aside className="w-64 bg-slate-900 text-white flex flex-col fixed inset-y-0 shadow-xl">
-                <div className="p-6 flex items-center gap-3 border-b border-slate-800">
-                    <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
-                        A
+            <aside className={`
+                w-64 bg-slate-900 text-white flex flex-col fixed inset-y-0 z-50 shadow-xl transition-transform duration-300
+                ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
+                md:translate-x-0
+            `}>
+                <div className="p-6 flex items-center justify-between border-b border-slate-800">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                            A
+                        </div>
+                        <span className="text-xl font-bold tracking-tight">Portal</span>
                     </div>
-                    <span className="text-xl font-bold tracking-tight">Admin Portal</span>
+                    <button
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="md:hidden text-slate-400 hover:text-white"
+                    >
+                        <X className="w-6 h-6" />
+                    </button>
                 </div>
                 <nav className="flex-grow p-4 space-y-2 mt-4">
                     {navItems.map((item) => (
                         <Link
                             key={item.path}
                             to={item.path}
+                            onClick={() => setIsMobileMenuOpen(false)}
                             className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${location.pathname === item.path
                                 ? "bg-blue-600 text-white shadow-lg"
                                 : "text-slate-400 hover:bg-slate-800 hover:text-white"
@@ -53,22 +75,30 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </aside>
 
             {/* Main Content */}
-            <main className="flex-grow ml-64 min-h-screen">
-                <header className="bg-white border-b border-slate-200 h-20 flex items-center justify-between px-8 sticky top-0 z-10 shadow-sm">
-                    <h1 className="text-2xl font-bold text-slate-900">
-                        {navItems.find((n) => n.path === location.pathname)?.label ?? "Dashboard"}
-                    </h1>
+            <main className="flex-grow min-h-screen transition-all duration-300 md:ml-64 w-full">
+                <header className="bg-white border-b border-slate-200 h-16 md:h-20 flex items-center justify-between px-4 md:px-8 sticky top-0 z-30 shadow-sm">
                     <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => setIsMobileMenuOpen(true)}
+                            className="md:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg"
+                        >
+                            <Menu className="w-6 h-6" />
+                        </button>
+                        <h1 className="text-xl md:text-2xl font-bold text-slate-900 truncate">
+                            {navItems.find((n) => n.path === location.pathname)?.label ?? "Dashboard"}
+                        </h1>
+                    </div>
+                    <div className="flex items-center gap-3 md:gap-4">
                         <div className="text-right hidden sm:block">
                             <p className="text-sm font-bold text-slate-900">Administrator</p>
                             <p className="text-xs text-slate-500">Diba Restaurant</p>
                         </div>
-                        <div className="w-10 h-10 rounded-full bg-slate-200 border-2 border-slate-100 flex items-center justify-center text-slate-600">
+                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-200 border-2 border-slate-100 flex items-center justify-center text-slate-600">
                             <span className="text-xs font-bold">ADM</span>
                         </div>
                     </div>
                 </header>
-                <div className="p-8">
+                <div className="p-4 md:p-8 overflow-x-hidden">
                     {children}
                 </div>
             </main>
