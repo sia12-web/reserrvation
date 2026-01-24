@@ -11,7 +11,7 @@ export class ApiError extends Error {
   }
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.PROD ? "" : "http://localhost:3000");
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.PROD ? "/api" : "http://localhost:3000/api");
 const DEFAULT_TIMEOUT_MS = 10000;
 
 export async function httpPost<TResponse>(

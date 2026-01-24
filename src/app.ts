@@ -23,25 +23,18 @@ app.use(cors({
 }));
 app.use(cookieParser());
 
-app.use("/webhooks", express.raw({ type: "application/json" }), webhooksRouter);
-
-// Health check endpoint for Docker/K8s
 app.get("/health", (_req, res) => {
     res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
+app.use("/webhooks", express.raw({ type: "application/json" }), webhooksRouter);
 app.use(express.json());
 
-// Quick inline test
-app.get("/admin/test", (_req, res) => {
-    res.json({ test: "ok" });
-});
-
-app.use(layoutRouter);
-app.use(reservationsRouter);
-app.use("/admin", authRouter);
-app.use("/admin", adminRouter);
-console.log("Admin routes mounted at /admin");
+app.use("/api", layoutRouter);
+app.use("/api", reservationsRouter);
+app.use("/api/admin", authRouter);
+app.use("/api/admin", adminRouter);
+console.log("Admin API routes mounted at /api/admin");
 
 if (process.env.NODE_ENV === "production") {
     const path = require("path");
