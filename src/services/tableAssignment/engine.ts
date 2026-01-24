@@ -130,7 +130,7 @@ function scoreCandidate(tables: TableConfig[], partySize: number): number {
   const waste = totalCapacity - partySize;
 
   // Heavily penalize multiple tables to favor single-table solutions (was 2, now 20)
-  const tableCountPenalty = (tables.length - 1) * 20;
+  const tableCountPenalty = (tables.length - 1) * 10; // Reduced from 20 to 10 to allow reasonable combinations
 
   const mismatchPenalty = tables.reduce((sum, table) => {
     // Penalize using a large Merged Fixed table for very small groups if not needed
@@ -157,7 +157,13 @@ function scoreCandidate(tables: TableConfig[], partySize: number): number {
   const fragmentPenalty = calculateTopChainFragmentPenalty(tables);
   // Use average priority instead of sum to avoid favoring combinations
   const avgPriority = tables.reduce((sum, table) => sum + table.priorityScore, 0) / tables.length;
-  const priorityAdjustment = -avgPriority * 0.1;
+
+  // Stronger priority adjustment to favor standard/high-pri tables over overflow (pri 0)
+  const priorityAdjustment = -avgPriority * 10;
+
+  // Explicit semi-ban on Priority 0 (Overflow) tables unless necessary
+  // If avgPriority is low (e.g. 0), we add a massive penalty
+  const lowPriorityPenalty = avgPriority < 0.5 ? 50 : 0;
 
   return (
     waste +
@@ -167,7 +173,8 @@ function scoreCandidate(tables: TableConfig[], partySize: number): number {
     circularPenalty +
     circularBonus +
     bigTableBonus +
-    priorityAdjustment
+    priorityAdjustment +
+    lowPriorityPenalty
   );
 }
 
