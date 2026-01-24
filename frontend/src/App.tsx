@@ -12,6 +12,7 @@ import AdminFloorMap from "./routes/admin/AdminFloorMap";
 import ReservationsList from "./routes/admin/ReservationsList";
 import ReservationDetails from "./routes/admin/ReservationDetails";
 import ManageReservationPage from "./routes/client/ManageReservationPage";
+import SystemExplanationPage from "./pages/SystemExplanation";
 
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
@@ -53,7 +54,10 @@ export default function App() {
   return (
     <ErrorBoundary>
       <Routes>
-        <Route path="/" element={<Navigate to="/kiosk/new" replace />} />
+        {/* Redirect root to customer view for better public access */}
+        <Route path="/" element={<Navigate to="/reserve" replace />} />
+
+        {/* Kiosk Mode (Tablet) */}
         <Route
           element={
             <InactivityGuard>
@@ -71,6 +75,8 @@ export default function App() {
             element={<ReservationConflictPage />}
           />
         </Route>
+
+        {/* Admin Panel */}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route element={<AdminGuard />}>
           <Route element={<AdminLayout><Outlet /></AdminLayout>}>
@@ -79,10 +85,17 @@ export default function App() {
             <Route path="/admin/reservations/:id" element={<ReservationDetails />} />
           </Route>
         </Route>
+
+        {/* Customer View (Mobile/Desktop) */}
         <Route path="/reserve" element={<ReservePage />} />
         <Route path="/reserve/success/:id" element={<ReserveSuccessPage />} />
         <Route path="/reservations/manage/:shortId" element={<ManageReservationPage />} />
-        <Route path="*" element={<Navigate to="/kiosk/new" replace />} />
+
+        {/* Owner Guide */}
+        <Route path="/how-it-works" element={<SystemExplanationPage />} />
+
+        {/* Catch-all */}
+        <Route path="*" element={<Navigate to="/reserve" replace />} />
       </Routes>
     </ErrorBoundary>
   );
