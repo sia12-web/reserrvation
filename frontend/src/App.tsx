@@ -76,12 +76,12 @@ export default function App() {
 
         {/* Admin Panel */}
         <Route path="/admin/login" element={<AdminLogin />} />
-        <Route element={<AdminGuard />}>
+        <Route path="/admin" element={<AdminGuard />}>
           <Route element={<AdminLayout><Outlet /></AdminLayout>}>
             <Route index element={<Navigate to="/admin/reservations" replace />} />
-            <Route path="/admin/floor" element={<AdminFloorMap />} />
-            <Route path="/admin/reservations" element={<ReservationsList />} />
-            <Route path="/admin/reservations/:id" element={<ReservationDetails />} />
+            <Route path="floor" element={<AdminFloorMap />} />
+            <Route path="reservations" element={<ReservationsList />} />
+            <Route path="reservations/:id" element={<ReservationDetails />} />
           </Route>
         </Route>
 
