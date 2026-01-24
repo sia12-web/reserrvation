@@ -18,7 +18,12 @@ export default function ClientShell({ children, title, subtitle }: ClientShellPr
               </div>
               <span className="text-xl font-bold tracking-tight">Diba Restaurant</span>
             </div>
-            <a href="/admin/login" className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">
+            <a
+              href="/admin/login"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
+            >
               Admin Login →
             </a>
           </div>
