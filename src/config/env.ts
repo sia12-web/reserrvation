@@ -26,6 +26,8 @@ export const env = {
   smtpHost: process.env.SMTP_HOST ?? "localhost",
   smtpPort: Number(process.env.SMTP_PORT ?? "1025"),
   mailFrom: process.env.MAIL_FROM ?? "no-reply@reservation.com",
+  smtpUser: process.env.SMTP_USER,
+  smtpPass: process.env.SMTP_PASS,
   adminPin: requireInProduction(process.env.ADMIN_PIN, "ADMIN_PIN"),
   depositThreshold: Number(process.env.DEPOSIT_THRESHOLD ?? "10"),
   allowedOrigins: (process.env.ALLOWED_ORIGINS ?? "http://localhost:5173").split(",").map(o => o.trim()),
