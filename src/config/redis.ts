@@ -13,15 +13,16 @@ const realRedlock = new Redlock([redis], {
   retryJitter: 50,
 });
 
-// Mock redlock to allow testing without a running Redis server
-export const redlock = {
-  acquire: async (resources: string[], duration: number) => {
-    console.warn("Using MOCK redlock acquisition for:", resources);
-    return {
-      release: async () => {
-        console.log("Mock lock released");
-      },
-    };
-  },
-} as unknown as Redlock;
+export const redlock = (env.nodeEnv === 'test' || process.env.USE_MOCK_REDIS === 'true')
+  ? {
+    acquire: async (resources: string[], duration: number) => {
+      console.warn("Using MOCK redlock acquisition for:", resources);
+      return {
+        release: async () => {
+          // no-op
+        },
+      };
+    },
+  } as unknown as Redlock
+  : realRedlock;
 

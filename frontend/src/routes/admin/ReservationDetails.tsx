@@ -5,6 +5,7 @@ import { fetchAdminReservation, reassignTables, fetchFloorState } from "../../ap
 import { ChevronLeft, Table as TableIcon, Users, Clock, Phone, Mail, Hash, AlertCircle, Loader2, CalendarDays, X, User, Info } from "lucide-react";
 import dayjs from "dayjs";
 import { clsx } from "clsx";
+import { getGeometricCapacity } from "../../utils/tableUtils";
 
 export default function ReservationDetails() {
     const { id } = useParams();
@@ -21,9 +22,9 @@ export default function ReservationDetails() {
     });
 
     const { data: floor } = useQuery({
-        queryKey: ["admin_floor_availability"],
-        queryFn: () => fetchFloorState(),
-        enabled: isReassigning,
+        queryKey: ["admin_floor_availability", res?.startTime],
+        queryFn: () => fetchFloorState(res ? dayjs(res.startTime).format("YYYY-MM-DD") : undefined),
+        enabled: !!res,
     });
 
     const reassignMutation = useMutation({
@@ -46,6 +47,12 @@ export default function ReservationDetails() {
     const handleToggleTable = (tid: string) => {
         setNewTableIds(prev => prev.includes(tid) ? prev.filter(x => x !== tid) : [...prev, tid]);
     };
+
+    const selectedTables = floor?.tables?.filter((t: any) => newTableIds.includes(t.id)) || [];
+    const selectedCapacity = getGeometricCapacity(selectedTables);
+
+    const assignedTables = floor?.tables?.filter((t: any) => res.tableIds.includes(t.id)) || [];
+    const assignedCapacity = getGeometricCapacity(assignedTables);
 
     return (
         <div className="space-y-8 max-w-4xl animate-in slide-in-from-bottom-4 duration-500">
@@ -171,6 +178,13 @@ export default function ReservationDetails() {
                                                 </>
                                             )}
                                         </div>
+                                        {assignedCapacity > 0 && (
+                                            <div className={clsx("flex items-center gap-1.5 px-2 py-1 rounded-md border text-[10px] font-black uppercase tracking-wider",
+                                                assignedCapacity >= res.partySize ? "bg-green-50 border-green-200 text-green-700" : "bg-red-50 border-red-200 text-red-700"
+                                            )}>
+                                                <span>Cap: {assignedCapacity}</span>
+                                            </div>
+                                        )}
                                     </div>
                                     <button
                                         onClick={() => {
@@ -210,7 +224,18 @@ export default function ReservationDetails() {
 
                         <div className="space-y-8">
                             <div className="space-y-4">
-                                <p className="text-xs font-black uppercase tracking-widest text-slate-400">Select new tables (Party Size: {res.partySize})</p>
+                                <div className="flex items-center justify-between">
+                                    <p className="text-xs font-black uppercase tracking-widest text-slate-400">Select new tables</p>
+                                    <div className="flex items-center gap-2 text-xs font-bold bg-slate-100 px-2 py-1 rounded-lg">
+                                        <span className="text-slate-500">Party: {res.partySize}</span>
+                                        <span className="text-slate-300">|</span>
+                                        <span className={clsx(
+                                            selectedCapacity >= res.partySize ? "text-green-600" : "text-red-500"
+                                        )}>
+                                            Cap: {selectedCapacity}
+                                        </span>
+                                    </div>
+                                </div>
                                 <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
                                     {floor?.tables.map((table: any) => {
                                         const isBusy = table.status !== "AVAILABLE" && !table.reservations?.some((r: any) => r.id === id);

@@ -521,10 +521,17 @@ export default function ReservationsList() {
                                         </button>
                                     ))}
                                     <input
-                                        type="number"
-                                        className="w-16 px-2 py-2 rounded-lg border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500 text-center font-bold"
-                                        value={createForm.partySize || ""}
-                                        onChange={(e) => setCreateForm({ ...createForm, partySize: e.target.value === "" ? 0 : parseInt(e.target.value) })}
+                                        type="text"
+                                        inputMode="numeric"
+                                        className="w-20 px-2 py-2 rounded-lg border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500 text-center font-bold"
+                                        value={createForm.partySize === 0 ? "" : createForm.partySize}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            if (/^\d*$/.test(val)) {
+                                                setCreateForm({ ...createForm, partySize: val === "" ? 0 : parseInt(val) });
+                                            }
+                                        }}
+                                        placeholder="Custom"
                                     />
                                 </div>
                             </div>

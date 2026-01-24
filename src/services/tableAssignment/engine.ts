@@ -162,8 +162,8 @@ function scoreCandidate(tables: TableConfig[], partySize: number): number {
   const priorityAdjustment = -avgPriority * 10;
 
   // Explicit semi-ban on Priority 0 (Overflow) tables unless necessary
-  // If avgPriority is low (e.g. 0), we add a massive penalty
-  const lowPriorityPenalty = avgPriority < 0.5 ? 50 : 0;
+  // If avgPriority is low (e.g. 0), we add a massive penalty to make it a LAST RESORT
+  const lowPriorityPenalty = avgPriority < 0.5 ? 500 : 0;
 
   return (
     waste +
