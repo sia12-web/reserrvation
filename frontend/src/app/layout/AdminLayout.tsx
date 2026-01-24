@@ -8,8 +8,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const navItems = [
-        { label: "Floor Map", path: "/admin/floor", icon: <LayoutDashboard className="w-5 h-5" /> },
         { label: "Reservations", path: "/admin/reservations", icon: <CalendarDays className="w-5 h-5" /> },
+        { label: "Floor Map", path: "/admin/floor", icon: <LayoutDashboard className="w-5 h-5" /> },
     ];
 
     useEffect(() => {

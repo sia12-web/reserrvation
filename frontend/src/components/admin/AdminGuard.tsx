@@ -40,7 +40,7 @@ export function AdminLogin() {
         try {
             await adminLogin(pin);
             // On success, the cookie is set. We can navigate.
-            navigate("/admin/floor");
+            navigate("/admin/reservations");
         } catch (err: any) {
             setError(err.message || "Authentication failed");
         } finally {

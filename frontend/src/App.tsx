@@ -78,6 +78,7 @@ export default function App() {
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route element={<AdminGuard />}>
           <Route element={<AdminLayout><Outlet /></AdminLayout>}>
+            <Route index element={<Navigate to="/admin/reservations" replace />} />
             <Route path="/admin/floor" element={<AdminFloorMap />} />
             <Route path="/admin/reservations" element={<ReservationsList />} />
             <Route path="/admin/reservations/:id" element={<ReservationDetails />} />
