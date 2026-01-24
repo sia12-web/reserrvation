@@ -33,11 +33,17 @@ export default function AdminFloorMap() {
 
 
     const quickDates = [
+        { label: "Today", date: dayjs() },
         { label: "Tomorrow", date: dayjs().add(1, 'day') },
-        { label: "Fri", date: dayjs().day(5).isAfter(dayjs(), 'day') ? dayjs().day(5) : dayjs().add(1, 'week').day(5) },
-        { label: "Sat", date: dayjs().day(6).isAfter(dayjs(), 'day') ? dayjs().day(6) : dayjs().add(1, 'week').day(6) },
-        { label: "Sun", date: dayjs().day(0).isAfter(dayjs(), 'day') ? dayjs().day(0) : dayjs().add(1, 'week').day(0) },
-    ];
+        ...[5, 6, 0].map(dayNum => {
+            const label = dayNum === 5 ? "Fri" : dayNum === 6 ? "Sat" : "Sun";
+            let d = dayjs().day(dayNum);
+            if (d.isBefore(dayjs(), 'day')) d = d.add(1, 'week');
+            return { label, date: d };
+        })
+    ].filter((item, index, self) =>
+        index === self.findIndex((t) => t.date.isSame(item.date, 'day'))
+    );
 
     const freeMutation = useMutation({
         mutationFn: (tid: string) => freeTable(tid, reason),
