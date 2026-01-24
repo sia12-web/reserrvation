@@ -249,20 +249,30 @@ router.get(
         const tables = layout.tables.map((t) => {
             const tableReservations = occupancyMap[t.id] || [];
 
-            // Determine active status
+            // Determine active status: only consider non-completed/non-cancelled ones for status
             let status = "AVAILABLE";
             if (tableReservations.length > 0) {
                 const isActiveNow = tableReservations.some(r =>
-                    // Active if:
-                    // 1. Time window covers NOW (Standard)
-                    // 2. OR status is CHECKED_IN (Guest is physically here, even if early)
+                    ['CONFIRMED', 'CHECKED_IN'].includes(r.status) &&
                     (
                         (new Date(r.startTime) <= now && new Date(r.endTime) >= now) ||
                         (r.status === 'CHECKED_IN' && new Date(r.endTime) >= now)
-                    ) &&
-                    ['CONFIRMED', 'CHECKED_IN'].includes(r.status)
+                    )
                 );
-                status = isActiveNow ? "OCCUPIED" : "RESERVED";
+
+                if (isActiveNow) {
+                    status = "OCCUPIED";
+                } else {
+                    // It's not occupied now, check if there's a FUTURE reservation in the window
+                    // (Ignoring COMPLETED and those in the past)
+                    const isReservedFuture = tableReservations.some(r =>
+                        ['CONFIRMED', 'PENDING_DEPOSIT', 'HOLD'].includes(r.status) &&
+                        new Date(r.startTime) > now
+                    );
+                    if (isReservedFuture) {
+                        status = "RESERVED";
+                    }
+                }
             }
 
             return {
