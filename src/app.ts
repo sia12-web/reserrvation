@@ -12,6 +12,12 @@ import { errorHandler } from "./middleware/errorHandler";
 
 const app = express();
 
+// Trust proxy when behind reverse proxy (Render, Heroku, etc.)
+// Required for express-rate-limit to work correctly
+if (process.env.NODE_ENV === "production") {
+    app.set("trust proxy", 1);
+}
+
 app.use(helmet());
 app.use(cors({
     origin: env.allowedOrigins,
