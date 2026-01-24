@@ -35,7 +35,8 @@ router.get("/debug/force-seed", asyncHandler(async (_req, res) => {
     // 1. Check if tables exist
     const count = await prisma.table.count();
     if (count > 0) {
-        return res.json({ message: "Database already has tables. Skipping seed to prevent data loss. Use /debug/reset-seed to force wipe." });
+        res.json({ message: "Database already has tables. Skipping seed to prevent data loss. Use /debug/reset-seed to force wipe." });
+        return;
     }
 
     // 2. Run seed logic (copied from seed.ts essentially)
