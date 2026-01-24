@@ -224,22 +224,12 @@ export function getGeometricCapacity(tables: TableConfig[]): number {
   if (tables.length === 0) return 0;
   if (tables.length === 1) return tables[0].maxCapacity;
 
-  // Check Vertical Alignment (Horizontal Combination?)
-  // If Y coordinate variance > threshold (e.g. 50), treat as Vertical stack -> Sum Capacity.
-  // Note: We use optional chaining/check because mock data might lack x/y
-  const hasCoordinates = tables.every(t => t.y !== undefined);
-  if (hasCoordinates) {
-    const yValues = tables.map(t => t.y!);
-    const minY = Math.min(...yValues);
-    const maxY = Math.max(...yValues);
+  // Horizontal/Vertical Layout agnostic geometric capacity
+  // Based on user feedback: 3 tables (T1+T2+T3) should accommodate ~15 people.
+  // Our formula below: 10 (base 2 units) + 5 (3rd unit) = 15.
+  // This matches perfectly. We remove the explicit "Sum if Vertical" check because
+  // simple summing (4+4+4=12) undercounts the capacity of T1+T2+T3 (15).
 
-    // If deviation > 50, assume vertical/mixed stacking -> Use simple sum
-    if (maxY - minY > 50) {
-      return tables.reduce((sum, t) => sum + t.maxCapacity, 0);
-    }
-  }
-
-  // Horizontal Combination -> Apply Formula
   const totalUnits = tables.reduce((sum, t) => sum + getTableUnits(t), 0);
 
   if (totalUnits <= 1) return tables[0].maxCapacity;
