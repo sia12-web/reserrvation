@@ -13,10 +13,8 @@ import { errorHandler } from "./middleware/errorHandler";
 const app = express();
 
 // Trust proxy when behind reverse proxy (Render, Heroku, etc.)
-// Required for express-rate-limit to work correctly
-if (process.env.NODE_ENV === "production") {
-    app.set("trust proxy", 1);
-}
+// Set to true to trust all 'X-Forwarded-*' headers from Render's load balancer
+app.set("trust proxy", true);
 
 app.use(helmet());
 app.use(cors({
