@@ -54,10 +54,10 @@ export default function App() {
   return (
     <ErrorBoundary>
       <Routes>
-        {/* Redirect root to customer view for better public access */}
-        <Route path="/" element={<Navigate to="/reserve" replace />} />
+        {/* Redirect root to Kiosk view (Unified Client Experience) */}
+        <Route path="/" element={<Navigate to="/kiosk/new" replace />} />
 
-        {/* Kiosk Mode (Tablet) */}
+        {/* Kiosk Mode (Main UI) */}
         <Route
           element={
             <InactivityGuard>
@@ -86,16 +86,16 @@ export default function App() {
           </Route>
         </Route>
 
-        {/* Customer View (Mobile/Desktop) */}
-        <Route path="/reserve" element={<ReservePage />} />
-        <Route path="/reserve/success/:id" element={<ReserveSuccessPage />} />
+        {/* Legacy Customer Routes -> Redirect to Kiosk */}
+        <Route path="/reserve" element={<Navigate to="/kiosk/new" replace />} />
+        <Route path="/reserve/success/:id" element={<ReservationSuccessPage />} /> {/* Reuse kiosk success page? Or redirect? */}
         <Route path="/reservations/manage/:shortId" element={<ManageReservationPage />} />
 
         {/* Owner Guide */}
         <Route path="/how-it-works" element={<SystemExplanationPage />} />
 
         {/* Catch-all */}
-        <Route path="*" element={<Navigate to="/reserve" replace />} />
+        <Route path="*" element={<Navigate to="/kiosk/new" replace />} />
       </Routes>
     </ErrorBoundary>
   );

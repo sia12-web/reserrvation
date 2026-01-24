@@ -11,11 +11,16 @@ export default function ClientShell({ children, title, subtitle }: ClientShellPr
     <div className="min-h-screen bg-white text-slate-900 flex flex-col">
       <header className="border-b border-slate-100">
         <div className="max-w-3xl mx-auto px-5 py-8 space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center text-white font-bold text-xl">
-              D
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                D
+              </div>
+              <span className="text-xl font-bold tracking-tight">Diba Restaurant</span>
             </div>
-            <span className="text-xl font-bold tracking-tight">Diba Restaurant</span>
+            <a href="/admin/login" className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">
+              Admin Login →
+            </a>
           </div>
           <div className="space-y-1">
             <h1 className="text-3xl font-bold">{title ?? "Reserve a table"}</h1>
@@ -47,7 +52,7 @@ export default function ClientShell({ children, title, subtitle }: ClientShellPr
         </div>
         <div className="max-w-3xl mx-auto px-5 py-4 border-t border-slate-100 text-center flex justify-between items-center">
           <p className="text-xs text-slate-400">© 2025 Diba Restaurant. All Reserved.</p>
-          <a href="/admin/login" className="text-xs text-slate-300 hover:text-slate-500 transition-colors">Admin</a>
+          <a href="/how-it-works" className="text-xs text-slate-400 hover:text-slate-600 underline">Owner Guide: How this works</a>
         </div>
       </footer>
     </div>
