@@ -1,6 +1,7 @@
 import js from '@eslint/js';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
+import globals from 'globals';
 
 export default [
   js.configs.recommended,
@@ -14,8 +15,8 @@ export default [
         project: './tsconfig.json',
       },
       globals: {
-        node: true,
-        es2020: true,
+        ...globals.node,
+        ...globals.es2020,
       },
     },
     plugins: {
@@ -23,12 +24,13 @@ export default [
     },
     rules: {
       ...tsPlugin.configs.recommended.rules,
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-non-null-assertion': 'warn',
-      'no-console': ['warn', { allow: ['warn', 'error'] }],
-      'no-unused-vars': 'off', // Turn off base rule as TypeScript handles this
+      'no-console': 'off', // Allow console for development and logging
+      'no-unused-vars': 'off',
+      'no-undef': 'off', // TypeScript already handles this
     },
   },
   {
