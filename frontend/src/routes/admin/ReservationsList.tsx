@@ -523,8 +523,8 @@ export default function ReservationsList() {
                                     <input
                                         type="number"
                                         className="w-16 px-2 py-2 rounded-lg border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500 text-center font-bold"
-                                        value={createForm.partySize}
-                                        onChange={(e) => setCreateForm({ ...createForm, partySize: parseInt(e.target.value) || 1 })}
+                                        value={createForm.partySize || ""}
+                                        onChange={(e) => setCreateForm({ ...createForm, partySize: e.target.value === "" ? 0 : parseInt(e.target.value) })}
                                     />
                                 </div>
                             </div>
@@ -554,7 +554,7 @@ export default function ReservationsList() {
                                 </button>
                                 <button
                                     onClick={() => handleCreate()}
-                                    disabled={createMutation.isPending || !createForm.clientName || !createForm.clientPhone}
+                                    disabled={createMutation.isPending || !createForm.clientName || !createForm.clientPhone || !createForm.partySize}
                                     className="flex-[2] bg-blue-600 text-white py-3 rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all disabled:opacity-50"
                                 >
                                     {createMutation.isPending ? "Creating..." : "Create Reservation"}
