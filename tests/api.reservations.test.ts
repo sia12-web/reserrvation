@@ -64,7 +64,7 @@ describe("POST /reservations", () => {
     redlockMock.acquire.mockResolvedValue({ release: jest.fn() });
 
     const response = await request(app)
-      .post("/reservations")
+      .post("/api/reservations")
       .send({
         clientName: "Alex Doe",
         clientPhone: "+14155551212",
@@ -86,7 +86,7 @@ describe("POST /reservations", () => {
     prismaMock.reservationTable.findMany.mockResolvedValue([{ tableId: "T1" }]);
 
     const response = await request(app)
-      .post("/reservations")
+      .post("/api/reservations")
       .send({
         clientName: "Alex Doe",
         clientPhone: "+14155551212",

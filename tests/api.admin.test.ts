@@ -52,7 +52,7 @@ describe("Admin API Endpoints", () => {
             ]);
 
             const response = await request(app)
-                .get("/admin/reservations")
+                .get("/api/admin/reservations")
                 .set("x-admin-pin", ADMIN_PIN);
 
             expect(response.status).toBe(200);
@@ -61,7 +61,7 @@ describe("Admin API Endpoints", () => {
         });
 
         it("returns 401 with missing PIN", async () => {
-            const response = await request(app).get("/admin/reservations");
+            const response = await request(app).get("/api/admin/reservations");
             expect(response.status).toBe(401);
         });
     });
@@ -76,7 +76,7 @@ describe("Admin API Endpoints", () => {
             prismaMock.reservation.create.mockResolvedValue({ id: "res-walkin", shortId: "WALK1" });
 
             const response = await request(app)
-                .post("/admin/walkins")
+                .post("/api/admin/walkins")
                 .set("x-admin-pin", ADMIN_PIN)
                 .send({
                     partySize: 2,
@@ -97,7 +97,7 @@ describe("Admin API Endpoints", () => {
             });
 
             const response = await request(app)
-                .post("/admin/tables/T1/free")
+                .post("/api/admin/tables/T1/free")
                 .set("x-admin-pin", ADMIN_PIN)
                 .send({ reason: "Customer left early" });
 
