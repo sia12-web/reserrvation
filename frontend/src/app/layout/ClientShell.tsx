@@ -28,7 +28,7 @@ export default function ClientShell({ children, title, subtitle }: ClientShellPr
               className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-black text-slate-600 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all shadow-sm"
             >
               <ShieldCheck className="w-4 h-4 text-blue-500 group-hover:text-blue-300" />
-              <span>Owner Portal</span>
+              <span>Admin Portal</span>
             </a>
           </div>
           <div className="space-y-1">
