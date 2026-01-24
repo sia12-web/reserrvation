@@ -32,6 +32,6 @@ export const ADJACENCY_GRAPH: Record<string, string[]> = {
   T10: ["T9", "T11"],
   T11: ["T10", "T12"],
   T12: ["T11", "T13"],
-  T13: ["T12", "T14"],
-  T14: ["T13"],
+  T13: ["T12"],
+  T14: [],
 };
