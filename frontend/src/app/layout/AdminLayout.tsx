@@ -35,9 +35,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             `}>
                 <div className="p-6 flex items-center justify-between border-b border-slate-800">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
-                            A
-                        </div>
+                        <img src="/favicon.png" alt="Logo" className="w-10 h-10 rounded-lg object-contain bg-white" />
                         <span className="text-xl font-bold tracking-tight">Portal</span>
                     </div>
                     <button
@@ -93,9 +91,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                             <p className="text-sm font-bold text-slate-900">Administrator</p>
                             <p className="text-xs text-slate-500">Diba Restaurant</p>
                         </div>
-                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-200 border-2 border-slate-100 flex items-center justify-center text-slate-600">
-                            <span className="text-xs font-bold">ADM</span>
-                        </div>
+                        <img src="/favicon.png" alt="Admin" className="w-8 h-8 md:w-10 md:h-10 rounded-full object-contain bg-slate-100" />
                     </div>
                 </header>
                 <div className="p-4 md:p-8 overflow-x-hidden">
