@@ -45,8 +45,9 @@ export default function ClientShell({ children, title, subtitle }: ClientShellPr
             <p className="text-slate-600 text-sm italic">Bring your own wine 🍷</p>
           </div>
         </div>
-        <div className="max-w-3xl mx-auto px-5 py-4 border-t border-slate-100 text-center">
+        <div className="max-w-3xl mx-auto px-5 py-4 border-t border-slate-100 text-center flex justify-between items-center">
           <p className="text-xs text-slate-400">© 2025 Diba Restaurant. All Reserved.</p>
+          <a href="/admin/login" className="text-xs text-slate-300 hover:text-slate-500 transition-colors">Admin</a>
         </div>
       </footer>
     </div>
