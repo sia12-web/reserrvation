@@ -12,11 +12,7 @@ function generateToken(userId: string, emailVerified: boolean): string {
   const options = {
     expiresIn: env.JWT_EXPIRES_IN,
   };
-  return jwt.sign(
-    { userId, emailVerified },
-    env.JWT_SECRET,
-    options as any
-  );
+  return jwt.sign({ userId, emailVerified }, env.JWT_SECRET, options as any);
 }
 
 // POST /api/auth/register

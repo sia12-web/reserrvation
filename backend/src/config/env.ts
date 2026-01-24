@@ -18,7 +18,9 @@ const envSchema = z
     UNIVERSITY_DOMAINS: z
       .string()
       .min(1, 'UNIVERSITY_DOMAINS must be provided')
-      .default('.edu,.ualberta.ca,.ubc.ca,.utoronto.ca,.mcgill.ca,.uwaterloo.ca,.queensu.ca,.mc-master.ca')
+      .default(
+        '.edu,.ualberta.ca,.ubc.ca,.utoronto.ca,.mcgill.ca,.uwaterloo.ca,.queensu.ca,.mc-master.ca'
+      )
       .transform((val) => val.split(',').map((d) => d.trim())),
   })
   .passthrough();
