@@ -21,10 +21,8 @@ export function getGeometricCapacity(tables: TableSimple[]): number {
     // Base 2 units = 10.
     let capacity = 10;
     for (let u = 3; u <= totalUnits; u++) {
-        // If u is Odd (3, 5) -> +5
-        // If u is Even (4, 6) -> +4
-        if (u % 2 !== 0) capacity += 5;
-        else capacity += 4;
+        // Simplified: Always +5 per unit
+        capacity += 5;
     }
     return capacity;
 }
