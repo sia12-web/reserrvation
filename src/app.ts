@@ -38,6 +38,16 @@ app.use(reservationsRouter);
 app.use("/admin", authRouter);
 app.use("/admin", adminRouter);
 console.log("Admin routes mounted at /admin");
+
+if (process.env.NODE_ENV === "production") {
+    const path = require("path");
+    const frontendPath = path.join(__dirname, "../../frontend/dist");
+    app.use(express.static(frontendPath));
+    app.get("*", (_req, res) => {
+        res.sendFile(path.join(frontendPath, "index.html"));
+    });
+}
+
 app.use(errorHandler);
 
 export default app;

@@ -16,7 +16,7 @@ const router = Router();
 
 const adminActionLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 100, // 100 actions per 15 mins for admins
+    max: 500, // 500 requests per 15 mins for admins (allows frequent polling)
     message: { error: "Too many admin actions, please slow down" },
 });
 
@@ -132,10 +132,13 @@ router.get(
         let endTime: Date;
 
         if (date) {
-            // If specific date provided (e.g. from picker), toggle "Day View" mode
-            const targetDate = new Date(date as string);
-            startTime = new Date(targetDate.setHours(0, 0, 0, 0));
-            endTime = new Date(targetDate.setHours(23, 59, 59, 999));
+            // Parse the date as YYYY-MM-DD and treat it as local restaurant time (EST = UTC-5)
+            // The frontend sends "2026-01-22" meaning Jan 22 in local time
+            const [year, month, day] = (date as string).split('-').map(Number);
+            // Create dates in EST: midnight to 11:59:59 PM
+            // EST is UTC-5, so midnight EST = 05:00 UTC
+            startTime = new Date(Date.UTC(year, month - 1, day, 5, 0, 0, 0)); // 00:00 EST = 05:00 UTC
+            endTime = new Date(Date.UTC(year, month - 1, day + 1, 4, 59, 59, 999)); // 23:59:59 EST = 04:59:59 UTC next day
         } else {
             // Default "Live View": -15 mins to +4 hours
             startTime = from ? new Date(from as string) : new Date(now.getTime() - 15 * 60000);

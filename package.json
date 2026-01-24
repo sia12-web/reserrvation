@@ -5,9 +5,11 @@
   "scripts": {
     "dev": "npx tsx watch src/index.ts",
     "build": "tsc",
+    "build:frontend": "cd frontend && npm install && npm run build",
+    "build:deploy": "npm install && npm run prisma:generate && npm run build && npm run build:frontend",
     "prisma:generate": "prisma generate",
     "test": "jest",
-    "ci": "npm run prisma:generate && npm run build && npm run test && cd frontend && npm install && npm run build"
+    "ci": "npm run prisma:generate && npm run build && npm run test && npm run build:frontend"
   },
   "keywords": [],
   "author": "",

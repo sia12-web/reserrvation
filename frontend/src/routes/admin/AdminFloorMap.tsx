@@ -33,6 +33,7 @@ export default function AdminFloorMap() {
 
 
     const quickDates = [
+        { label: "Today", date: dayjs() },
         { label: "Tomorrow", date: dayjs().add(1, 'day') },
         { label: "Fri", date: dayjs().day(5).isBefore(dayjs(), 'day') ? dayjs().add(1, 'week').day(5) : dayjs().day(5) },
         { label: "Sat", date: dayjs().day(6).isBefore(dayjs(), 'day') ? dayjs().add(1, 'week').day(6) : dayjs().day(6) },
@@ -109,14 +110,6 @@ export default function AdminFloorMap() {
                             </div>
 
                             <div className="flex items-center gap-3">
-                                {!isToday && (
-                                    <button
-                                        onClick={() => setSelectedDate(new Date().toISOString().split('T')[0])}
-                                        className="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-100 transition-all"
-                                    >
-                                        Jump to Today
-                                    </button>
-                                )}
                                 <div className={clsx(
                                     "flex items-center gap-2 px-4 py-2 rounded-full border border-blue-100 transition-all",
                                     isToday ? "bg-blue-50 text-blue-800" : "bg-purple-50 text-purple-800 border-purple-100"

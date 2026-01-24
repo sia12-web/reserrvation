@@ -13,8 +13,8 @@ export default function ReservationSummary({ reservation }: ReservationSummaryPr
     status === "CONFIRMED"
       ? "bg-green-100 text-green-800"
       : status === "PENDING_DEPOSIT"
-      ? "bg-amber-100 text-amber-800"
-      : "bg-slate-200 text-slate-800";
+        ? "bg-amber-100 text-amber-800"
+        : "bg-slate-200 text-slate-800";
 
   return (
     <div className="space-y-4">
@@ -37,6 +37,11 @@ export default function ReservationSummary({ reservation }: ReservationSummaryPr
             <p className="text-sm text-slate-500">Time</p>
             <p className="text-lg font-medium">
               {formatTimeWindow(reservation.startTime, reservation.endTime)}
+            </p>
+          </div>
+          <div className="mt-4 p-4 bg-blue-50 border border-blue-100 rounded-lg">
+            <p className="text-blue-800 text-sm font-medium">
+              ✉️ We have sent your reservation confirmation to your email.
             </p>
           </div>
         </div>
