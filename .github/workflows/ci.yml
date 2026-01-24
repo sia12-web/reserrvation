@@ -52,11 +52,11 @@ jobs:
         working-directory: ./backend
         run: npx prisma generate
 
-      - name: Apply Prisma migrations
+      - name: Sync Prisma schema
         working-directory: ./backend
         env:
           DATABASE_URL: postgresql://classmatefinder:classmatefinder_test@localhost:5432/classmatefinder_test
-        run: npx prisma migrate deploy
+        run: npx prisma db push --accept-data-loss
 
       - name: Run tests
         working-directory: ./backend
