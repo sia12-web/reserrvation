@@ -58,8 +58,8 @@ export default function FloorMap({
 
     return (
         <div className="w-full h-full relative select-none flex flex-col border border-slate-200 rounded-xl overflow-hidden bg-slate-50/50">
-            <div className="flex-grow overflow-auto relative min-h-[300px]">
-                <div className="min-w-[600px] h-full p-4">
+            <div className="flex-grow relative overflow-hidden flex items-center justify-center bg-white/40 min-h-[300px] sm:min-h-[400px]">
+                <div className="w-full max-w-2xl p-4 sm:p-8">
                     <svg
                         viewBox={`${bounds.minX - PADDING} ${bounds.minY - PADDING} ${bounds.maxX - bounds.minX + PADDING * 2} ${bounds.maxY - bounds.minY + PADDING * 2}`}
                         className="w-full h-full drop-shadow-xl"
@@ -194,7 +194,7 @@ export default function FloorMap({
                     </svg>
                 </div>
             </div>
-            <div className="p-4 bg-white/80 backdrop-blur-sm flex flex-wrap items-center justify-center gap-4 text-xs font-semibold border-t border-slate-200">
+            <div className="p-4 bg-white/90 backdrop-blur-sm flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-xs font-semibold border-t border-slate-200">
                 {/* Legend */}
                 {layout.name === "Floor View" ? (
                     // Admin Legend
