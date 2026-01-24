@@ -4,8 +4,6 @@ import NewReservationPage from "./routes/kiosk/NewReservationPage";
 import ReservationSuccessPage from "./routes/kiosk/ReservationSuccessPage";
 import ReservationConflictPage from "./routes/kiosk/ReservationConflictPage";
 import InactivityGuard from "./components/kiosk/InactivityGuard";
-import ReservePage from "./routes/client/ReservePage";
-import ReserveSuccessPage from "./routes/client/ReserveSuccessPage";
 import AdminGuard, { AdminLogin } from "./components/admin/AdminGuard";
 import AdminLayout from "./app/layout/AdminLayout";
 import AdminFloorMap from "./routes/admin/AdminFloorMap";
@@ -86,9 +84,11 @@ export default function App() {
           </Route>
         </Route>
 
-        {/* Legacy Customer Routes -> Redirect to Kiosk */}
+        {/* Legacy /reserve -> Redirect to Kiosk */}
         <Route path="/reserve" element={<Navigate to="/kiosk/new" replace />} />
-        <Route path="/reserve/success/:id" element={<ReservationSuccessPage />} /> {/* Reuse kiosk success page? Or redirect? */}
+        <Route path="/reserve/success/:id" element={<Navigate to={`/kiosk/reservations/${window.location.pathname.split('/').pop()}/success`} replace />} />
+
+        {/* Manage Existing Reservation */}
         <Route path="/reservations/manage/:shortId" element={<ManageReservationPage />} />
 
         {/* Owner Guide */}
