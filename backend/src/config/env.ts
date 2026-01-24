@@ -8,8 +8,9 @@ const envSchema = z
     NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
     PORT: z
       .string()
+      .default('5000')
       .transform((val) => parseInt(val, 10))
-      .pipe(z.number().int().positive().default(5000)),
+      .pipe(z.number().int().positive()),
     DATABASE_URL: z.string().url('DATABASE_URL must be a valid URL').optional(),
     JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters').optional(),
     JWT_EXPIRES_IN: z.string().default('7d'),
@@ -17,8 +18,8 @@ const envSchema = z
     UNIVERSITY_DOMAINS: z
       .string()
       .min(1, 'UNIVERSITY_DOMAINS must be provided')
-      .transform((val) => val.split(',').map((d) => d.trim()))
-      .default('.edu,.ualberta.ca,.ubc.ca,.utoronto.ca,.mcgill.ca,.uwaterloo.ca,.queensu.ca,.mc-master.ca'),
+      .default('.edu,.ualberta.ca,.ubc.ca,.utoronto.ca,.mcgill.ca,.uwaterloo.ca,.queensu.ca,.mc-master.ca')
+      .transform((val) => val.split(',').map((d) => d.trim())),
   })
   .passthrough();
 
@@ -46,8 +47,8 @@ function validateEnv(): Env {
     }
 
     // In non-test mode, we log and exit if things are missing
-    const missingVars = result.error.errors
-      .map((err) => `  - ${err.path.join('.')}: ${err.message}`)
+    const missingVars = result.error.issues
+      .map((err: any) => `  - ${err.path.join('.')}: ${err.message}`)
       .join('\n');
 
     console.error('❌ Invalid environment variables:\n' + missingVars);

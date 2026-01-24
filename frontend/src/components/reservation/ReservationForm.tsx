@@ -85,6 +85,33 @@ export default function ReservationForm({
   }, [selectedSlot]);
 
 
+  const quickDates = useMemo(() => {
+    const today = getRestaurantNow().startOf("day");
+    const tomorrow = today.add(1, "day");
+
+    const getNextDay = (targetDayNum: number) => {
+      let d = today.day(targetDayNum);
+      // If today is targetDay or after, move to next week
+      if (d.isBefore(today, "day") || d.isSame(today, "day")) {
+        d = d.add(1, "week");
+      }
+      return d;
+    };
+
+    const nextFri = getNextDay(5);
+    const nextSat = getNextDay(6);
+    const nextSun = getNextDay(0);
+
+    return [
+      { label: "Today", date: today },
+      { label: "Tomorrow", date: tomorrow },
+      { label: "Next Fri", date: nextFri },
+      { label: "Next Sat", date: nextSat },
+      { label: "Next Sun", date: nextSun },
+    ].filter((item, index, self) =>
+      index === self.findIndex((t) => t.date.isSame(item.date, "day"))
+    );
+  }, [getRestaurantNow]);
 
   const slots = useMemo(() => {
     const now = getRestaurantNow();
@@ -272,6 +299,40 @@ export default function ReservationForm({
             <p className="text-red-600 text-sm mt-1">{fieldErrors.clientEmail}</p>
           ) : null}
         </label>
+
+        <div className="space-y-2">
+          <span className="text-lg font-medium">Quick Dates</span>
+          <div className="flex flex-wrap gap-2">
+            {quickDates.map((item) => {
+              const isSelected = selectedDay.isSame(item.date, "day");
+              return (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={() => {
+                    setSelectedDay(item.date.startOf("day"));
+                    const now = getRestaurantNow();
+                    const noon = item.date.hour(12).minute(0).second(0).millisecond(0);
+                    const fromTime = noon.isAfter(now) ? noon : now;
+                    const next = getNextStartSlot(fromTime);
+                    setSelectedSlot(next);
+                  }}
+                  className={clsx(
+                    "px-4 h-10 rounded-md border text-sm font-medium transition-all whitespace-nowrap",
+                    isSelected
+                      ? "bg-slate-900 text-white border-slate-900 shadow-sm"
+                      : "bg-white text-slate-600 border-slate-300 hover:border-slate-400"
+                  )}
+                >
+                  {item.label}{" "}
+                  <span className="opacity-60 font-normal ml-1">
+                    {item.date.format("MMM D")}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
         <div className="space-y-2">
           <span className="text-lg font-medium">Party Size</span>
