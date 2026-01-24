@@ -41,7 +41,7 @@ console.log("Admin routes mounted at /admin");
 
 if (process.env.NODE_ENV === "production") {
     const path = require("path");
-    const frontendPath = path.join(__dirname, "../../frontend/dist");
+    const frontendPath = path.join(__dirname, "../frontend/dist");
     app.use(express.static(frontendPath));
     // Express 5 requires named wildcard parameter instead of just '*'
     app.get("/{*path}", (_req, res) => {
