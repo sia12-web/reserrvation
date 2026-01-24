@@ -353,12 +353,7 @@ export default function ReservationsList() {
                             <p className="text-slate-600">
                                 This will <strong>permanently delete</strong> all reservations, customer data, and logs from the database. This action cannot be undone.
                             </p>
-                            <div className="w-full bg-red-50 p-4 rounded-xl border border-red-100 text-left">
-                                <p className="text-xs font-bold text-red-800 uppercase tracking-widest mb-1">Warning</p>
-                                <p className="text-sm text-red-700">Are you sure you want to proceed? Type <strong>RESET</strong> below to confirm.</p>
-                            </div>
-
-                            {/* Simple confirmation logic - just buttons for now for speed/easiness */}
+                            {/* Simplified confirmation logic */}
                             <div className="flex gap-3 w-full pt-2">
                                 <button
                                     onClick={() => setIsResetModalOpen(false)}
@@ -371,7 +366,7 @@ export default function ReservationsList() {
                                     disabled={resetMutation.isPending}
                                     className="flex-[2] bg-red-600 text-white py-3 rounded-xl font-bold shadow-lg shadow-red-200 hover:bg-red-700 transition-all animate-pulse"
                                 >
-                                    {resetMutation.isPending ? "Wiping Data..." : "YES, WIPE EVERYTHING"}
+                                    {resetMutation.isPending ? "Wiping Data..." : "YES, DELETE ALL"}
                                 </button>
                             </div>
                         </div>
@@ -438,8 +433,18 @@ export default function ReservationsList() {
                                         type="text"
                                         className="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-700 bg-slate-50"
                                         value={createForm.clientPhone}
-                                        onChange={(e) => setCreateForm({ ...createForm, clientPhone: e.target.value })}
+                                        onChange={(e) => {
+                                            const raw = e.target.value.replace(/\D/g, "");
+                                            let formatted = raw;
+                                            if (raw.length > 3 && raw.length <= 6) {
+                                                formatted = `${raw.slice(0, 3)}-${raw.slice(3)}`;
+                                            } else if (raw.length > 6) {
+                                                formatted = `${raw.slice(0, 3)}-${raw.slice(3, 6)}-${raw.slice(6, 10)}`;
+                                            }
+                                            setCreateForm({ ...createForm, clientPhone: formatted });
+                                        }}
                                         placeholder="555-0123"
+                                        maxLength={12}
                                     />
                                 </div>
                             </div>
@@ -506,7 +511,7 @@ export default function ReservationsList() {
                             <div>
                                 <label className="text-xs font-black uppercase tracking-widest text-slate-400 block mb-2">Party Size</label>
                                 <div className="flex gap-2 flex-wrap">
-                                    {[1, 2, 3, 4, 5, 6, 8, 10, 12].map(size => (
+                                    {[1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30].map(size => (
                                         <button
                                             key={size}
                                             onClick={() => setCreateForm({ ...createForm, partySize: size })}

@@ -372,7 +372,7 @@ router.post(
  * Create an immediate reservation for a walk-in
  */
 const walkinSchema = z.object({
-    partySize: z.number().int().min(1).max(22),
+    partySize: z.number().int().min(1).max(50),
     clientName: z.string().optional(),
     clientPhone: z.string().optional(),
     tableIds: z.array(z.string()).optional(),
@@ -487,7 +487,7 @@ router.post(
 const createReservationSchema = z.object({
     clientName: z.string().min(1),
     clientPhone: z.string().min(1),
-    partySize: z.number().int().min(1).max(22),
+    partySize: z.number().int().min(1).max(50),
     startTime: z.string().datetime().or(z.string()), // Accept ISO string
     internalNotes: z.string().optional(),
 });
