@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "npx tsx watch src/index.ts",
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "build:frontend": "cd frontend && npm install && npm run build",
     "build:deploy": "npm install && npm run build && npm run build:frontend",
     "prisma:generate": "prisma generate",
