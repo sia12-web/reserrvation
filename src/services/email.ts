@@ -222,7 +222,7 @@ export async function sendThankYouEmail(params: { to: string; clientName: string
 }
 
 export async function sendDepositRequestEmail(params: ReservationEmailParams) {
-    const { to, clientName, partySize, startTime, shortId } = params;
+    const { to, clientName, partySize, startTime, shortId, tableIds } = params;
 
     const dateStr = startTime.toLocaleString("en-CA", {
         dateStyle: "full",
@@ -258,5 +258,21 @@ export async function sendDepositRequestEmail(params: ReservationEmailParams) {
         logger.info({ msg: "Deposit request email sent", shortId, to });
     } catch (error) {
         logger.error({ msg: "Failed to send deposit request email", error, shortId });
+    }
+
+    // Send Telegram notification for pending deposit (Large Party)
+    if (env.telegramChatId) {
+        const telegramMsg = formatReservationNotification({
+            type: "DEPOSIT_REQUIRED",
+            clientName,
+            clientPhone: params.clientPhone || "N/A",
+            partySize,
+            startTime,
+            shortId,
+            tableIds,
+        });
+        sendTelegramMessage({ chatId: env.telegramChatId, text: telegramMsg }).catch((err) =>
+            logger.error({ msg: "Telegram deposit notification failed", error: err })
+        );
     }
 }

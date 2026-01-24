@@ -288,6 +288,7 @@ router.post(
           sendDepositRequestEmail({
             to: reservation.clientEmail,
             clientName: reservation.clientName,
+            clientPhone: reservation.clientPhone,
             partySize: reservation.partySize,
             startTime: reservation.startTime,
             shortId: reservation.shortId,
