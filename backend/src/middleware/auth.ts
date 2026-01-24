@@ -21,15 +21,22 @@ export function authenticate(req: AuthRequest, res: Response, next: NextFunction
   const token = authHeader.substring(7);
 
   try {
-    const decoded = jwt.verify(token, env.JWT_SECRET) as {
-      userId: string;
-      emailVerified: boolean;
-    };
-
-    req.userId = decoded.userId;
-    req.emailVerified = decoded.emailVerified;
-
-    next();
+    const decoded = jwt.verify(token, env.JWT_SECRET);
+    if (
+      typeof decoded === 'object' &&
+      decoded !== null &&
+      typeof (decoded as any).userId === 'string' &&
+      typeof (decoded as any).emailVerified === 'boolean'
+    ) {
+      req.userId = (decoded as any).userId;
+      req.emailVerified = (decoded as any).emailVerified;
+      next();
+    } else {
+      res.status(401).json({
+        code: 'INVALID_CREDENTIALS',
+        message: 'Invalid token payload',
+      });
+    }
   } catch (error) {
     res.status(401).json({
       code: 'INVALID_CREDENTIALS',

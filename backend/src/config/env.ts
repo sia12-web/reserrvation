@@ -11,8 +11,8 @@ const envSchema = z
       .default('5000')
       .transform((val) => parseInt(val, 10))
       .pipe(z.number().int().positive()),
-    DATABASE_URL: z.string().url('DATABASE_URL must be a valid URL').optional(),
-    JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters').optional(),
+    DATABASE_URL: z.string().url('DATABASE_URL must be a valid URL'),
+    JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
     JWT_EXPIRES_IN: z.string().default('7d'),
     CORS_ORIGIN: z.string().url('CORS_ORIGIN must be a valid URL').default('http://localhost:3000'),
     UNIVERSITY_DOMAINS: z

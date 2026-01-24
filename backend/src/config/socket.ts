@@ -13,19 +13,25 @@ export const setupSocketIO = (io: SocketIOServer) => {
     }
 
     try {
-      const decoded = jwt.verify(token, env.JWT_SECRET) as {
-        userId: string;
-        emailVerified: boolean;
-      };
+      const decoded = jwt.verify(token, env.JWT_SECRET);
 
-      // Check email verification (ADR-0008)
-      if (!decoded.emailVerified) {
-        return next(new Error('Email verification required'));
+      if (
+        typeof decoded === 'object' &&
+        decoded !== null &&
+        typeof (decoded as any).userId === 'string' &&
+        typeof (decoded as any).emailVerified === 'boolean'
+      ) {
+        // Check email verification (ADR-0008)
+        if (!(decoded as any).emailVerified) {
+          return next(new Error('Email verification required'));
+        }
+
+        socket.userId = (decoded as any).userId;
+        socket.emailVerified = (decoded as any).emailVerified;
+        next();
+      } else {
+        return next(new Error('Authentication error: Invalid token payload'));
       }
-
-      socket.userId = decoded.userId;
-      socket.emailVerified = decoded.emailVerified;
-      next();
     } catch (error) {
       next(new Error('Authentication error: Invalid token'));
     }
