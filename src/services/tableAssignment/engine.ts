@@ -113,7 +113,7 @@ function generateCombinationCandidates(
 function buildCandidate(tables: TableConfig[], partySize: number): CandidateSet {
   const sortedIds = [...tables]
     .map((table) => table.id)
-    .sort((a, b) => a.localeCompare(b));
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
   const totalCapacity = getGeometricCapacity(tables);
   const score = scoreCandidate(tables, partySize);
