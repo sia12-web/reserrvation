@@ -196,7 +196,7 @@ export default function ReservationsList() {
                                 <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Guest</th>
                                 <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Time</th>
                                 <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Party</th>
-                                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Tables</th>
+                                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider min-w-[120px]">Tables</th>
                                 <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
                                 <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
                             </tr>
@@ -230,9 +230,9 @@ export default function ReservationsList() {
                                         </div>
                                     </td>
                                     <td className="px-4 py-3 whitespace-nowrap">
-                                        <div className="flex flex-wrap gap-1 max-w-[150px]">
+                                        <div className="flex flex-wrap gap-1.5 min-w-[120px] max-w-[200px]">
                                             {res.tableIds.map((tid: string) => (
-                                                <span key={tid} className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full text-[10px] font-bold border border-blue-100">
+                                                <span key={tid} className="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full text-[11px] font-bold border border-blue-100 shadow-sm">
                                                     {tid}
                                                 </span>
                                             ))}

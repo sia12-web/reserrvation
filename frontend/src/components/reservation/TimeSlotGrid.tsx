@@ -2,23 +2,17 @@ import { Dayjs } from "dayjs";
 import { formatTime } from "../../utils/time";
 import clsx from "clsx";
 
-type TimeSlotGridProps = {
-  slots: Dayjs[];
-  selected: Dayjs | null;
-  onSelect: (slot: Dayjs) => void;
-  columns?: 3 | 4;
-};
-
 export default function TimeSlotGrid({
   slots,
   selected,
   onSelect,
-  columns = 3,
-}: TimeSlotGridProps) {
-  const gridColsClass = columns === 4 ? "grid-cols-4" : "grid-cols-3";
-
+}: {
+  slots: Dayjs[];
+  selected: Dayjs | null;
+  onSelect: (slot: Dayjs) => void;
+}) {
   return (
-    <div className={clsx("grid gap-3", gridColsClass)}>
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
       {slots.map((slot) => {
         const isSelected = selected?.valueOf() === slot.valueOf();
         return (

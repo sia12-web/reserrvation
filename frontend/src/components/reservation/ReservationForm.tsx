@@ -29,6 +29,8 @@ type ReservationFormProps = {
   onConflict: (args: { payload: ReservationRequest; draft: ReservationDraft }) => void;
 };
 
+
+
 const SLOT_COUNT = 48; // generated pool; UI shows a smaller window at a time
 const SLOT_PAGE_SIZE = 24;
 
@@ -40,6 +42,7 @@ export default function ReservationForm({
   const { resetKiosk } = useKioskReset();
   const { generateTimeSlots, getNextStartSlot, getRestaurantNow, toRestaurantTime, toUtcIso } =
     useRestaurantTime();
+
   const [clientName, setClientName] = useState(defaultValues?.clientName ?? "");
   const [clientPhone, setClientPhone] = useState(defaultValues?.clientPhone ?? "");
   const [clientEmail, setClientEmail] = useState(defaultValues?.clientEmail ?? "");
@@ -263,11 +266,11 @@ export default function ReservationForm({
         </div>
       )}
 
-      <div className="grid gap-4">
+      <div className="grid gap-6 md:grid-cols-2">
         <label className="block space-y-2">
-          <span className="text-lg font-medium">Name</span>
+          <span className="text-lg font-medium text-slate-700">Name</span>
           <input
-            className="h-12 w-full rounded-md border border-slate-300 px-4 text-lg"
+            className="h-14 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
             value={clientName}
             onChange={(event) => setClientName(event.target.value)}
             placeholder="Guest name"
@@ -278,18 +281,20 @@ export default function ReservationForm({
           ) : null}
         </label>
 
-        <PhoneInput
-          label="Phone"
-          value={clientPhone}
-          onChange={setClientPhone}
-          error={fieldErrors.clientPhone}
-        />
+        <div className="space-y-2">
+          <PhoneInput
+            label="Phone"
+            value={clientPhone}
+            onChange={setClientPhone}
+            error={fieldErrors.clientPhone}
+          />
+        </div>
 
         <label className="block space-y-2">
-          <span className="text-lg font-medium">Email</span>
+          <span className="text-lg font-medium text-slate-700">Email</span>
           <input
             type="email"
-            className="h-12 w-full rounded-md border border-slate-300 px-4 text-lg"
+            className="h-14 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
             value={clientEmail}
             onChange={(event) => setClientEmail(event.target.value)}
             placeholder="name@example.com"
@@ -300,6 +305,16 @@ export default function ReservationForm({
           ) : null}
         </label>
 
+        <div className="space-y-2">
+          <span className="text-lg font-medium text-slate-700">Party Size</span>
+          <PartySizeStepper value={partySize} onChange={setPartySize} />
+          {fieldErrors.partySize ? (
+            <span className="text-red-600 text-sm">{fieldErrors.partySize}</span>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="grid gap-8">
         <div className="space-y-2">
           <span className="text-lg font-medium">Quick Dates</span>
           <div className="flex flex-wrap gap-2">
@@ -334,13 +349,7 @@ export default function ReservationForm({
           </div>
         </div>
 
-        <div className="space-y-2">
-          <span className="text-lg font-medium">Party Size</span>
-          <PartySizeStepper value={partySize} onChange={setPartySize} />
-          {fieldErrors.partySize ? (
-            <span className="text-red-600 text-sm">{fieldErrors.partySize}</span>
-          ) : null}
-        </div>
+
 
         <div className="space-y-2">
           <div className="space-y-2">
@@ -365,7 +374,6 @@ export default function ReservationForm({
             slots={pagedSlots}
             selected={selectedSlot}
             onSelect={setSelectedSlot}
-            columns={4} // We can keep 4 or increase to 6 if space allows, but let's stick to 4 for now and see the height reduction
           />
           <div className="flex gap-3">
             <button

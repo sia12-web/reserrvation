@@ -10,7 +10,7 @@ export default function ClientShell({ children, title, subtitle }: ClientShellPr
   return (
     <div className="min-h-screen bg-white text-slate-900 flex flex-col">
       <header className="border-b border-slate-100">
-        <div className="max-w-3xl mx-auto px-5 py-8 space-y-4">
+        <div className="max-w-5xl mx-auto px-5 py-8 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center text-white font-bold text-xl">
@@ -34,12 +34,12 @@ export default function ClientShell({ children, title, subtitle }: ClientShellPr
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-5 py-10 flex-grow w-full">
+      <main className="max-w-4xl mx-auto px-5 py-10 flex-grow w-full">
         {children}
       </main>
 
       <footer className="border-t border-slate-100 bg-slate-50 mt-10">
-        <div className="max-w-3xl mx-auto px-5 py-8 grid gap-6 sm:grid-cols-2">
+        <div className="max-w-4xl mx-auto px-5 py-8 grid gap-6 sm:grid-cols-2">
           <div className="space-y-2">
             <p className="font-semibold">Visit Us</p>
             <p className="text-slate-600 text-sm leading-relaxed">
@@ -55,7 +55,7 @@ export default function ClientShell({ children, title, subtitle }: ClientShellPr
             <p className="text-slate-600 text-sm italic">Bring your own wine 🍷</p>
           </div>
         </div>
-        <div className="max-w-3xl mx-auto px-5 py-4 border-t border-slate-100 text-center flex justify-between items-center">
+        <div className="max-w-4xl mx-auto px-5 py-4 border-t border-slate-100 text-center flex justify-between items-center">
           <p className="text-xs text-slate-400">© 2025 Diba Restaurant. All Reserved.</p>
           <a href="/how-it-works" className="text-xs text-slate-400 hover:text-slate-600 underline">Owner Guide: How this works</a>
         </div>
@@ -63,4 +63,3 @@ export default function ClientShell({ children, title, subtitle }: ClientShellPr
     </div>
   );
 }
-
