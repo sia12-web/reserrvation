@@ -32,18 +32,22 @@ export default function AdminFloorMap() {
 
 
 
+    const getNextBusyDay = (dayNum: number) => {
+        let d = dayjs().day(dayNum);
+        // If the day is today or already passed this week, skip to next week
+        if (d.isSame(dayjs(), 'day') || d.isSame(dayjs().add(1, 'day'), 'day') || d.isBefore(dayjs(), 'day')) {
+            d = d.add(1, 'week');
+        }
+        return d;
+    };
+
     const quickDates = [
         { label: "Today", date: dayjs() },
         { label: "Tomorrow", date: dayjs().add(1, 'day') },
-        ...[5, 6, 0].map(dayNum => {
-            const label = dayNum === 5 ? "Fri" : dayNum === 6 ? "Sat" : "Sun";
-            let d = dayjs().day(dayNum);
-            if (d.isBefore(dayjs(), 'day')) d = d.add(1, 'week');
-            return { label, date: d };
-        })
-    ].filter((item, index, self) =>
-        index === self.findIndex((t) => t.date.isSame(item.date, 'day'))
-    );
+        { label: "Next Fri", date: getNextBusyDay(5) },
+        { label: "Next Sat", date: getNextBusyDay(6) },
+        { label: "Next Sun", date: getNextBusyDay(0) },
+    ];
 
     const freeMutation = useMutation({
         mutationFn: (tid: string) => freeTable(tid, reason),
