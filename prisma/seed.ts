@@ -44,7 +44,14 @@ async function main() {
     // 3. Upsert Tables (Create if missing)
     console.log("Upserting tables...");
     for (const t of tables) {
-        const existing = await prisma.table.findUnique({ where: { id: t.id } });
+        const existing = await prisma.table.findUnique({
+            where: {
+                id_layoutId: {
+                    id: t.id,
+                    layoutId: layout.id
+                }
+            }
+        });
         if (!existing) {
             await prisma.table.create({
                 data: {

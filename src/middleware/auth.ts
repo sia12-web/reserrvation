@@ -21,6 +21,7 @@ export function adminAuth(req: Request, res: Response, next: NextFunction) {
     const pin = req.headers["x-admin-pin"] || req.query.pin;
 
     if (pin !== env.adminPin) {
+        console.warn(`Admin auth failed: No valid token and PIN mismatch. Headers: ${JSON.stringify(req.headers)}, Cookies: ${JSON.stringify(req.cookies)}`);
         throw new HttpError(401, "Invalid or missing admin session");
     }
 

@@ -14,7 +14,7 @@ const app = express();
 
 // Trust proxy when behind reverse proxy (Render, Heroku, etc.)
 // Set to true to trust all 'X-Forwarded-*' headers from Render's load balancer
-app.set("trust proxy", true);
+app.set("trust proxy", 1);
 
 app.use(helmet());
 app.use(cors({

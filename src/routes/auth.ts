@@ -32,6 +32,7 @@ router.post(
             httpOnly: true,
             secure: env.nodeEnv === "production",
             sameSite: "lax",
+            path: "/",
             maxAge: 24 * 60 * 60 * 1000, // 24 hours
         });
 
