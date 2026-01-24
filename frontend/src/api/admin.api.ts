@@ -91,3 +91,7 @@ export async function createReservation(payload: {
 }) {
     return httpPost<ReservationAdmin>("/admin/reservations", payload);
 }
+
+export async function resetReservations() {
+    return httpPost<{ message: string }>("/admin/debug/reset-reservations", {});
+}

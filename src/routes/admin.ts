@@ -89,6 +89,20 @@ router.get("/debug/force-seed", asyncHandler(async (_req, res) => {
     res.json({ message: "Seeded successfully! Tables T1-T15 created." });
 }));
 
+// RESET RESERVATIONS ENDPOINT
+router.post("/debug/reset-reservations", asyncHandler(async (_req, res) => {
+    // 1. Delete ReservationTables
+    await prisma.reservationTable.deleteMany({});
+    // 2. Delete Payments
+    await prisma.payment.deleteMany({});
+    // 3. Delete AuditLogs
+    await prisma.auditLog.deleteMany({});
+    // 4. Delete Reservations
+    const count = await prisma.reservation.deleteMany({});
+
+    res.json({ message: `System Reset: Cleared ${count.count} reservations and all related data.` });
+}));
+
 /**
  * GET /admin/reservations
  * List all reservations with filtering
