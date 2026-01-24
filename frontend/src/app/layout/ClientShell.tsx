@@ -21,15 +21,23 @@ export default function ClientShell({ children, title, subtitle }: ClientShellPr
               <img src="/favicon.png" alt="Diba Logo" className="w-10 h-10 rounded-lg object-contain" />
               <span className="text-xl font-bold tracking-tight">Diba Restaurant</span>
             </div>
-            <a
-              href="/admin/login"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-black text-slate-600 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all shadow-sm"
-            >
-              <ShieldCheck className="w-4 h-4 text-blue-500 group-hover:text-blue-300" />
-              <span>Admin Portal</span>
-            </a>
+            <div className="flex items-center gap-4">
+              <a
+                href="/how-it-works"
+                className="hidden md:block text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                How it works?
+              </a>
+              <a
+                href="/admin/login"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-black text-slate-600 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all shadow-sm"
+              >
+                <ShieldCheck className="w-4 h-4 text-blue-500 group-hover:text-blue-300" />
+                <span>Admin Portal</span>
+              </a>
+            </div>
           </div>
           <div className="space-y-1">
             <h1 className="text-3xl font-bold">{title ?? "Reserve a table"}</h1>
