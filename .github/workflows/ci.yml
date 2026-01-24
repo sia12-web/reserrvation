@@ -5,6 +5,8 @@ on:
     branches: [main]
   push:
     branches: [main]
+  schedule:
+    - cron: '0 3 * * *' # 10 PM EST daily
 
 permissions:
   contents: read

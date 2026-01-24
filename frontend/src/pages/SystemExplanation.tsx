@@ -3,59 +3,103 @@ import ClientShell from "../app/layout/ClientShell";
 export default function SystemExplanationPage() {
     return (
         <ClientShell title="How the System Works" subtitle="A guide for the owner">
-            <div className="space-y-8 text-slate-700">
-                <section className="space-y-3">
-                    <h2 className="text-xl font-bold text-slate-900 border-b pb-2">1. Smart Reservation Engine</h2>
-                    <p>
-                        This isn't just a form; it's a <strong>smart engine</strong>. When a customer (or you) picks a time and party size, the system runs a complex algorithm to check every single table against existing reservations.
+            <div className="space-y-10 text-slate-700 pb-20">
+                <section className="space-y-4">
+                    <h2 className="text-2xl font-black text-slate-900 border-b-2 border-slate-100 pb-2">1. The Reservation Lifecycle</h2>
+                    <p className="leading-relaxed">
+                        The system is a <strong>real-time decision engine</strong>. Every time a slot is selected, the system simulates the entire restaurant floor to ensure no conflicts and optimal seating.
                     </p>
-                    <ul className="list-disc pl-5 space-y-1">
-                        <li><strong>No Double Booking:</strong> The system strictly forbids two people booking the same table at the same time. It's mathematically impossible.</li>
-                        <li><strong>Optimization:</strong> It automatically tries to find the "best" table (e.g., fitting a party of 2 at a 2-top instead of wasting a 6-top).</li>
-                        <li><strong>Collision Detection:</strong> If you verify tables manually, it warns you if you try to overlap reservations.</li>
+                    <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="text-slate-400 text-[10px] uppercase tracking-widest text-left">
+                                    <th className="pb-4">Party Size</th>
+                                    <th className="pb-4">Duration</th>
+                                    <th className="pb-4">Seating Logic</th>
+                                </tr>
+                            </thead>
+                            <tbody className="font-medium text-slate-700 divide-y divide-slate-200/50">
+                                <tr>
+                                    <td className="py-3 pr-4">1 - 2 Guests</td>
+                                    <td className="py-3">90 Minutes</td>
+                                    <td className="py-3 italic text-slate-500">Fastest turnover, fits standard 2-tops/4-tops.</td>
+                                </tr>
+                                <tr>
+                                    <td className="py-3 pr-4">3 - 4 Guests</td>
+                                    <td className="py-3">105 Minutes</td>
+                                    <td className="py-3 italic text-slate-500">Assigned to standard 4-top tables.</td>
+                                </tr>
+                                <tr>
+                                    <td className="py-3 pr-4">5 - 7 Guests</td>
+                                    <td className="py-3">120 Minutes</td>
+                                    <td className="py-3 font-bold text-blue-600 underline decoration-blue-200">Priority: Circular Tables (T4, T6)</td>
+                                </tr>
+                                <tr>
+                                    <td className="py-3 pr-4">8 - 10 Guests</td>
+                                    <td className="py-3">135 Minutes</td>
+                                    <td className="py-3 italic text-slate-500">Merged tables (e.g. T9+T10 or T11+T12).</td>
+                                </tr>
+                                <tr>
+                                    <td className="py-3 pr-4">11 - 14 Guests</td>
+                                    <td className="py-3">165 Minutes</td>
+                                    <td className="py-3 font-bold text-amber-600 underline decoration-amber-200">Deposit Required + Large Table Combinations</td>
+                                </tr>
+                                <tr>
+                                    <td className="py-3 pr-4">15 - 30+ Guests</td>
+                                    <td className="py-3">195 Minutes</td>
+                                    <td className="py-3 italic text-slate-500">"Total Floor Lock" mode. Uses the T15 overflow system.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section className="space-y-4">
+                    <h2 className="text-2xl font-black text-slate-900 border-b-2 border-slate-100 pb-2">2. Visual Table Control</h2>
+                    <ul className="grid gap-4 sm:grid-cols-2">
+                        <li className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-2">
+                            <p className="font-black text-slate-900">Green = Available</p>
+                            <p className="text-sm text-slate-500">Ready to book. No overlapping reservations within the next 2.5 hours.</p>
+                        </li>
+                        <li className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-2">
+                            <p className="font-black text-slate-900 text-amber-600">Amber = Occupied</p>
+                            <p className="text-sm text-slate-500">Someone is currently seated. Admin can manually "Free Table" if they leave early.</p>
+                        </li>
+                        <li className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-2">
+                            <p className="font-black text-slate-900 text-indigo-600">Indigo = Reserved</p>
+                            <p className="text-sm text-slate-500">A reservation is starting soon. The engine "locks" this table 15 mins early.</p>
+                        </li>
+                        <li className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-2">
+                            <p className="font-black text-slate-400">Gray = Locked</p>
+                            <p className="text-sm text-slate-500">Manual lock by Admin (e.g. table is broken or reserved for VIP).</p>
+                        </li>
                     </ul>
                 </section>
 
-                <section className="space-y-3">
-                    <h2 className="text-xl font-bold text-slate-900 border-b pb-2">2. Kiosk vs. Online Mode</h2>
-                    <p>
-                        The system works in two ways automatically:
-                    </p>
-                    <ul className="list-disc pl-5 space-y-1">
-                        <li><strong>Online (Guest View):</strong> Guests see a simplified view. They can pick a time, or (if you enabled it) pick a specific table from the visual map.</li>
-                        <li><strong>Kiosk (Staff/Admin View):</strong> In the Admin panel, you have a <strong>Live Floor Map</strong>. You can see exactly which tables are Occupied (Red), Reserved (Yellow), or Free (Green) in real-time.</li>
-                    </ul>
+                <section className="space-y-4">
+                    <h2 className="text-2xl font-black text-slate-900 border-b-2 border-slate-100 pb-2">3. Admin Superpowers</h2>
+                    <div className="grid gap-6 md:grid-cols-3">
+                        <div className="space-y-2">
+                            <p className="font-bold text-blue-600">Override Engine</p>
+                            <p className="text-sm leading-relaxed text-slate-600">As Admin, you can ignore all rules. Move a party of 1 to a table for 10, or force-book a table even if it's "locked".</p>
+                        </div>
+                        <div className="space-y-2">
+                            <p className="font-bold text-blue-600">Instant Cleanup</p>
+                            <p className="text-sm leading-relaxed text-slate-600">One-click to "Check-In" guests or "Free" a table. This updates the public kiosk immediately.</p>
+                        </div>
+                        <div className="space-y-2">
+                            <p className="font-bold text-blue-600">Sheet Printing</p>
+                            <p className="text-sm leading-relaxed text-slate-600">Export your daily reservations to a clean, printable sheet for your staff at the host stand.</p>
+                        </div>
+                    </div>
                 </section>
 
-                <section className="space-y-3">
-                    <h2 className="text-xl font-bold text-slate-900 border-b pb-2">3. Notifications (Telegram & Email)</h2>
-                    <p>
-                        You don't need to check the screen constantly.
-                    </p>
-                    <ul className="list-disc pl-5 space-y-1">
-                        <li><strong>Instant Alerts:</strong> When a new reservation comes in, you get a ping on your dedicated <strong>Telegram Group</strong> instantly.</li>
-                        <li><strong>Late Warnings:</strong> If a guest hasn't checked in 15 minutes after their start time, the system will nudge you on Telegram: "Table T4 is late!".</li>
-                        <li><strong>Email:</strong> Guests get confirmation emails automatically.</li>
-                    </ul>
-                </section>
-
-                <section className="space-y-3">
-                    <h2 className="text-xl font-bold text-slate-900 border-b pb-2">4. Reliability Tricks</h2>
-                    <p>
-                        To make sure this never breaks during a busy Friday night:
-                    </p>
-                    <ul className="list-disc pl-5 space-y-1">
-                        <li><strong>Auto-Healing Database:</strong> If the server restarts, it automatically reconnects.</li>
-                        <li><strong>Anti-Crash Validation:</strong> Checks are in place to ensure phone numbers and names are valid before they even reach the database.</li>
-                        <li><strong>Time-Zone Aware:</strong> It knows you are in Montreal/Eastern Time, so bookings are always accurate to your local time.</li>
-                    </ul>
-                </section>
-
-                <div className="pt-6 border-t mt-8">
-                    <p className="font-bold text-slate-900">Try it out:</p>
-                    <p>1. Go to <a href="/admin/login" className="text-blue-600 underline">Admin Login</a> (Use PIN: 1234)</p>
-                    <p>2. Open this page in another tab (or phone) and make a reservation.</p>
-                    <p>3. Watch it appear instantly on the Admin Dashboard!</p>
+                <div className="bg-slate-900 rounded-[2rem] p-8 text-white text-center space-y-4 shadow-2xl">
+                    <p className="text-xl font-black">Ready to take control?</p>
+                    <div className="flex flex-wrap justify-center gap-4">
+                        <a href="/admin/reservations" className="bg-blue-600 hover:bg-blue-700 px-8 py-4 rounded-xl font-black transition-all">Go to Admin Dashboard</a>
+                        <a href="/kiosk/new" className="bg-white text-slate-900 hover:bg-slate-100 px-8 py-4 rounded-xl font-black transition-all">Start Kiosk Demo</a>
+                    </div>
                 </div>
             </div>
         </ClientShell>

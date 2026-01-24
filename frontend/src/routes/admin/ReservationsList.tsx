@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchAdminReservations, cancelReservation, createReservation } from "../../api/admin.api";
 import type { ReservationAdmin } from "../../api/admin.api";
 import dayjs from "dayjs";
-import { Search as SearchIcon, Phone, Users, Info, CalendarDays } from "lucide-react";
+import { Search as SearchIcon, Phone, Users, Info, CalendarDays, Printer } from "lucide-react";
 import { clsx } from "clsx";
 import { Link } from "react-router-dom";
 
@@ -103,8 +103,45 @@ export default function ReservationsList() {
     </div>;
 
     return (
-        <div className="space-y-6">
-            <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+        <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
+            <style>
+                {`
+                @media print {
+                    aside, header, .no-print, button, .actions-column {
+                        display: none !important;
+                    }
+                    main {
+                        margin-left: 0 !important;
+                        padding: 0 !important;
+                    }
+                    .bg-white {
+                        box-shadow: none !important;
+                        border: none !important;
+                    }
+                    table {
+                        width: 100% !important;
+                        border-collapse: collapse !important;
+                    }
+                    th, td {
+                        border-bottom: 1px solid #e2e8f0 !important;
+                        padding: 12px 8px !important;
+                    }
+                    .print-header {
+                        display: block !important;
+                        margin-bottom: 24px;
+                        text-align: center;
+                    }
+                }
+                .print-header { display: none; }
+                `}
+            </style>
+
+            <div className="print-header">
+                <h1 className="text-2xl font-black">Daily Reservations - {dayjs(filterDate).format("dddd, MMMM D, YYYY")}</h1>
+                <p className="text-slate-500">Diba Restaurant Seating List</p>
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-100 no-print">
                 <div className="relative w-full md:w-96">
                     <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
                     <input
@@ -117,7 +154,7 @@ export default function ReservationsList() {
                 </div>
 
                 <div className="flex gap-3 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 items-center">
-                    <div className="flex gap-1">
+                    <div className="flex bg-slate-100 p-1 rounded-xl">
                         <button
                             onClick={() => { setViewMode('day'); setFilterDate(dayjs().format("YYYY-MM-DD")); }}
                             className={clsx(
@@ -152,6 +189,13 @@ export default function ReservationsList() {
                             Upcoming
                         </button>
                     </div>
+                    <button
+                        onClick={() => window.print()}
+                        className="flex-none bg-white text-slate-700 border border-slate-200 px-4 py-3 rounded-xl font-bold hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm no-print"
+                    >
+                        <Printer className="w-5 h-5" />
+                        <span className="hidden md:inline">Print List</span>
+                    </button>
                     <input
                         type="date"
                         className={clsx(
@@ -196,9 +240,9 @@ export default function ReservationsList() {
                                 <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Guest</th>
                                 <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Time</th>
                                 <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Party</th>
-                                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider min-w-[120px]">Tables</th>
+                                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Tables</th>
                                 <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
+                                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider no-print">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -241,7 +285,7 @@ export default function ReservationsList() {
                                     <td className="px-4 py-3 whitespace-nowrap">
                                         <StatusBadge status={res.status} />
                                     </td>
-                                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
+                                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium no-print">
                                         <div className="flex gap-2">
                                             {["CONFIRMED", "PENDING_DEPOSIT"].includes(res.status) && (
                                                 <button
