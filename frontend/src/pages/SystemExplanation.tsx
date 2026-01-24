@@ -85,7 +85,7 @@ export default function SystemExplanationPage() {
                         </div>
                         <div className="space-y-2">
                             <p className="font-bold text-blue-600">Instant Cleanup</p>
-                            <p className="text-sm leading-relaxed text-slate-600">One-click to "Check-In" guests or "Free" a table. This updates the public kiosk immediately.</p>
+                            <p className="text-sm leading-relaxed text-slate-600">One-click to "Check-In" guests or "Free" a table. This updates the public reservations page immediately.</p>
                         </div>
                         <div className="space-y-2">
                             <p className="font-bold text-blue-600">Sheet Printing</p>

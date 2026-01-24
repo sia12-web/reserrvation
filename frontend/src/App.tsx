@@ -31,7 +31,7 @@ class ErrorBoundary extends React.Component<
           <div className="max-w-md text-center space-y-3">
             <h1 className="text-2xl font-semibold">Something went wrong</h1>
             <p className="text-slate-600">
-              {isAdmin ? "Please return to the admin dashboard." : "Please return to the kiosk start screen."}
+              {isAdmin ? "Please return to the admin dashboard." : "Please return to the reservation home page."}
             </p>
             <a
               className="inline-flex items-center justify-center rounded-md bg-slate-900 text-white h-12 px-6 text-lg font-bold shadow-lg hover:bg-slate-800 transition-colors"
