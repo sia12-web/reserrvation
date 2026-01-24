@@ -2,10 +2,16 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function main() {
-    // Clean up existing
-    await prisma.reservationTable.deleteMany({})
-    await prisma.table.deleteMany({})
-    await prisma.layout.deleteMany({})
+    // Check if data already exists to avoid wiping production data on restart
+    const existingLayout = await prisma.layout.findFirst();
+    if (existingLayout) {
+        console.log("Database already seeded. Skipping seed.");
+        return;
+    }
+
+    // Only clean up if we are absolutely sure (or just proceed to create)
+    // For safety, let's just create. If you want to force reset, do it manually.
+
 
     const layout = await prisma.layout.create({
         data: {

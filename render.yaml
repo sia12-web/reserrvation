@@ -6,9 +6,9 @@ services:
     region: oregon
     plan: free # Uses the Free Tier
     # Build command installs deps, builds backend, builds frontend, and runs migrations
-    buildCommand: npm install --include=dev && npm run build:deploy && npx prisma migrate deploy && npx prisma db seed
-    # Start command runs the Node server (which now serves the frontend static files)
-    startCommand: node dist/index.js
+    buildCommand: npm install --include=dev && npm run build:deploy && npx prisma migrate deploy
+    # Start command runs the seed (safely) then starts the server
+    startCommand: npx prisma db seed && node dist/index.js
     envVars:
       - key: NODE_ENV
         value: production
