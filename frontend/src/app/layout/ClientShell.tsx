@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { ShieldCheck } from "lucide-react";
 
 type ClientShellProps = {
   children: React.ReactNode;
@@ -24,9 +25,10 @@ export default function ClientShell({ children, title, subtitle }: ClientShellPr
               href="/admin/login"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
+              className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-black text-slate-600 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all shadow-sm"
             >
-              Admin Login →
+              <ShieldCheck className="w-4 h-4 text-blue-500 group-hover:text-blue-300" />
+              <span>Owner Portal</span>
             </a>
           </div>
           <div className="space-y-1">
