@@ -147,10 +147,10 @@ export default function FloorMap({
                                         <text
                                             x={cx}
                                             y={cy}
-                                            dy="0.35em"
+                                            dy="0.3em"
                                             textAnchor="middle"
                                             className={clsx(
-                                                "text-sm font-bold pointer-events-none select-none",
+                                                "text-[24px] font-black pointer-events-none select-none",
                                                 isSelected ? "fill-white" :
                                                     (status === "OCCUPIED" && isAdminView) ? "fill-amber-900" :
                                                         (status === "RESERVED" && isAdminView) ? "fill-purple-900" :
@@ -176,10 +176,10 @@ export default function FloorMap({
                                     <text
                                         x={cx}
                                         y={cy}
-                                        dy="0.35em"
+                                        dy="0.3em"
                                         textAnchor="middle"
                                         className={clsx(
-                                            "text-sm font-bold pointer-events-none select-none",
+                                            "text-[24px] font-black pointer-events-none select-none",
                                             isSelected ? "fill-white" :
                                                 (status === "OCCUPIED" && isAdminView) ? "fill-amber-900" :
                                                     (status === "RESERVED" && isAdminView) ? "fill-purple-900" :

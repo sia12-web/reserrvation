@@ -158,7 +158,7 @@ export default function ReservationDetails() {
                                 <div className="flex items-center justify-between w-full">
                                     <div className="flex items-center gap-2">
                                         <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Assigned Tables</p>
-                                        <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-50 border border-slate-100 text-[9px] font-bold text-slate-500 uppercase tracking-wide">
+                                        <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-100 border border-slate-200 text-[10px] font-black text-slate-600 uppercase tracking-wider">
                                             {['WEB', 'KIOSK'].includes(res?.source) ? (
                                                 <>
                                                     <Users className="w-3 h-3" />
@@ -184,7 +184,7 @@ export default function ReservationDetails() {
                                 </div>
                                 <div className="flex flex-wrap gap-2 mt-1">
                                     {res.tableIds.map((tid: string) => (
-                                        <span key={tid} className="bg-blue-600 text-white px-3 py-1 rounded-lg text-xs font-black shadow-sm">
+                                        <span key={tid} className="bg-blue-600 text-white px-4 py-2 rounded-xl text-[14px] font-black shadow-md border-b-2 border-blue-800">
                                             {tid}
                                         </span>
                                     ))}

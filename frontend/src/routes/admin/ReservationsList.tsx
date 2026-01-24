@@ -205,7 +205,7 @@ export default function ReservationsList() {
                             {filtered.map((res: ReservationAdmin) => (
                                 <tr key={res.id} className="hover:bg-slate-50/80 transition-colors group">
                                     <td className="px-4 py-3 whitespace-nowrap">
-                                        <span className="font-mono text-xs font-bold bg-slate-100 px-2 py-1 rounded text-slate-600">
+                                        <span className="font-mono text-xs font-black bg-slate-100 px-2 py-1.5 rounded text-slate-700 border border-slate-200">
                                             #{res.shortId}
                                         </span>
                                     </td>
@@ -232,7 +232,7 @@ export default function ReservationsList() {
                                     <td className="px-4 py-3 whitespace-nowrap">
                                         <div className="flex flex-wrap gap-1.5 min-w-[120px] max-w-[200px]">
                                             {res.tableIds.map((tid: string) => (
-                                                <span key={tid} className="bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full text-[11px] font-bold border border-blue-100 shadow-sm">
+                                                <span key={tid} className="bg-blue-50 text-blue-800 px-3 py-1.5 rounded-lg text-[13px] font-black border border-blue-200 shadow-sm transition-transform hover:scale-105">
                                                     {tid}
                                                 </span>
                                             ))}
@@ -477,7 +477,7 @@ function StatusBadge({ status }: { status: string }) {
 
     return (
         <span className={clsx(
-            "px-3 py-1 rounded-full text-[11px] font-bold border uppercase tracking-wide shadow-sm inline-block",
+            "px-3 py-1.5 rounded-full text-[12px] font-black border uppercase tracking-widest shadow-sm inline-block",
             styles[status] || "bg-slate-100 text-slate-600"
         )}>
             {status.replace("_", " ")}
