@@ -1,5 +1,6 @@
 import { transporter } from "../config/mail";
 import { env } from "../config/env";
+import { sendTelegramMessage, formatReservationNotification } from "../config/telegram";
 import pino from "pino";
 
 const logger = pino();
@@ -7,6 +8,7 @@ const logger = pino();
 export interface ReservationEmailParams {
     to: string;
     clientName: string;
+    clientPhone?: string;
     partySize: number;
     startTime: Date;
     shortId: string;
@@ -15,7 +17,7 @@ export interface ReservationEmailParams {
 }
 
 export async function sendReservationConfirmation(params: ReservationEmailParams) {
-    const { to, clientName, partySize, startTime, shortId, tableIds, customerNotes } = params;
+    const { to, clientName, clientPhone, partySize, startTime, shortId, tableIds, customerNotes } = params;
 
     const dateStr = startTime.toLocaleString("en-CA", {
         dateStyle: "full",
@@ -62,6 +64,23 @@ export async function sendReservationConfirmation(params: ReservationEmailParams
         logger.info({ msg: "Email sent", messageId: info.messageId, to });
     } catch (error) {
         logger.error({ msg: "Failed to send email", error, to });
+    }
+
+    // Send Telegram notification to the owner/staff group
+    if (env.telegramChatId) {
+        const telegramMsg = formatReservationNotification({
+            type: "NEW",
+            clientName,
+            clientPhone: clientPhone || "N/A",
+            partySize,
+            startTime,
+            shortId,
+            tableIds,
+            customerNotes,
+        });
+        sendTelegramMessage({ chatId: env.telegramChatId, text: telegramMsg }).catch((err) =>
+            logger.error({ msg: "Telegram notification failed", error: err })
+        );
     }
 }
 
@@ -149,6 +168,22 @@ export async function sendLateWarning(params: ReservationEmailParams) {
         logger.info({ msg: "Late warning email sent", shortId, to });
     } catch (error) {
         logger.error({ msg: "Failed to send late warning email", error, shortId });
+    }
+
+    // Send URGENT Telegram notification for late arrivals
+    if (env.telegramChatId) {
+        const telegramMsg = formatReservationNotification({
+            type: "LATE",
+            clientName,
+            clientPhone: (params as any).clientPhone || "N/A",
+            partySize: (params as any).partySize || 0,
+            startTime,
+            shortId,
+            tableIds: (params as any).tableIds || [],
+        });
+        sendTelegramMessage({ chatId: env.telegramChatId, text: telegramMsg }).catch((err) =>
+            logger.error({ msg: "Telegram late warning failed", error: err })
+        );
     }
 }
 

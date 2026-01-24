@@ -33,4 +33,6 @@ export const env = {
   allowedOrigins: (process.env.ALLOWED_ORIGINS ?? "http://localhost:5173").split(",").map(o => o.trim()),
   jwtSecret: requireInProduction(process.env.JWT_SECRET, "JWT_SECRET"),
   reviewLink: process.env.REVIEW_LINK ?? "https://search.google.com/local/writereview?placeid=YOUR_PLACE_ID",
+  telegramBotToken: process.env.TELEGRAM_BOT_TOKEN,
+  telegramChatId: process.env.TELEGRAM_CHAT_ID,
 };
