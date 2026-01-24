@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { LayoutDashboard, CalendarDays, LogOut, Menu, X } from "lucide-react";
 import PromptSystem from "../../components/admin/PromptSystem";
@@ -7,15 +7,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-    const handleLogout = () => {
-        localStorage.removeItem("admin_pin");
-        window.location.href = "/admin/login";
-    };
-
     const navItems = [
         { label: "Floor Map", path: "/admin/floor", icon: <LayoutDashboard className="w-5 h-5" /> },
         { label: "Reservations", path: "/admin/reservations", icon: <CalendarDays className="w-5 h-5" /> },
     ];
+
+    useEffect(() => {
+        const currentItem = navItems.find((n) => n.path === location.pathname);
+        document.title = currentItem ? `Diba Portal - ${currentItem.label}` : "Diba Portal - Admin";
+    }, [location.pathname]);
+
+    const handleLogout = () => {
+        localStorage.removeItem("admin_pin");
+        window.location.href = "/admin/login";
+    };
 
     return (
         <div className="min-h-screen bg-slate-50 flex">

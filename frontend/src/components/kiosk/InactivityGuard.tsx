@@ -26,7 +26,7 @@ export default function InactivityGuard({ children }: { children: React.ReactNod
   const resetKiosk = useCallback(() => {
     queryClient.getMutationCache().clear();
     queryClient.removeQueries({ queryKey: ["reservation"] });
-    navigate("/kiosk/new", { replace: true, state: null });
+    navigate("/reservations", { replace: true, state: null });
   }, [navigate, queryClient]);
 
   useInactivityTimer({ timeoutSeconds: KIOSK_INACTIVITY_SECONDS, onTimeout: resetKiosk });

@@ -27,7 +27,7 @@ export default function ReservationConflictPage() {
 
   useEffect(() => {
     if (!payload) {
-      navigate("/kiosk/new", { replace: true });
+      navigate("/reservations", { replace: true });
     }
   }, [navigate, payload]);
 
@@ -39,7 +39,7 @@ export default function ReservationConflictPage() {
     setErrorMessage(null);
     mutate(nextPayload, {
       onSuccess: (response) => {
-        navigate(`/kiosk/reservations/${response.reservationId}/success`, {
+        navigate(`/reservations/${response.reservationId}/success`, {
           state: { reservation: response },
           replace: true,
         });
@@ -118,13 +118,13 @@ export default function ReservationConflictPage() {
         <div className="grid gap-3">
           <button
             className="h-12 rounded-md bg-white border border-slate-300 text-lg"
-            onClick={() => navigate("/kiosk/new", { state: { draft: draftToUse } })}
+            onClick={() => navigate("/reservations", { state: { draft: draftToUse } })}
           >
             Change time
           </button>
           <button
             className="h-12 rounded-md bg-white border border-slate-300 text-lg"
-            onClick={() => navigate("/kiosk/new", { state: { draft: draftToUse } })}
+            onClick={() => navigate("/reservations", { state: { draft: draftToUse } })}
           >
             Change party size
           </button>

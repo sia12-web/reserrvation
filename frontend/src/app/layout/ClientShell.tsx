@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect } from "react";
 
 type ClientShellProps = {
   children: React.ReactNode;
@@ -7,6 +7,10 @@ type ClientShellProps = {
 };
 
 export default function ClientShell({ children, title, subtitle }: ClientShellProps) {
+  useEffect(() => {
+    document.title = title ? `Diba Restaurant - ${title}` : "Diba Restaurant - Reservation";
+  }, [title]);
+
   return (
     <div className="min-h-screen bg-white text-slate-900 flex flex-col">
       <header className="border-b border-slate-100">

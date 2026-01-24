@@ -16,14 +16,14 @@ export default function NewReservationPage() {
 
   const handleSuccess = (response: unknown) => {
     const reservation = response as ReservationResponse;
-    navigate(`/kiosk/reservations/${reservation.reservationId}/success`, {
+    navigate(`/reservations/${reservation.reservationId}/success`, {
       state: { reservation },
       replace: true,
     });
   };
 
   const handleConflict = (args: { payload: ReservationRequest; draft: ReservationDraft }) => {
-    navigate("/kiosk/reservations/conflict", { state: args });
+    navigate("/reservations/conflict", { state: args });
   };
 
   return (

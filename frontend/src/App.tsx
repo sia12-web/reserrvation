@@ -35,7 +35,7 @@ class ErrorBoundary extends React.Component<
             </p>
             <a
               className="inline-flex items-center justify-center rounded-md bg-slate-900 text-white h-12 px-6 text-lg font-bold shadow-lg hover:bg-slate-800 transition-colors"
-              href={isAdmin ? "/admin/reservations" : "/kiosk/new"}
+              href={isAdmin ? "/admin/reservations" : "/reservations"}
             >
               {isAdmin ? "Return to Dashboard" : "Start New Reservation"}
             </a>
@@ -52,8 +52,8 @@ export default function App() {
   return (
     <ErrorBoundary>
       <Routes>
-        {/* Redirect root to Kiosk view (Unified Client Experience) */}
-        <Route path="/" element={<Navigate to="/kiosk/new" replace />} />
+        {/* Redirect root to Reservations view */}
+        <Route path="/" element={<Navigate to="/reservations" replace />} />
 
         {/* Kiosk Mode (Main UI) */}
         <Route
@@ -63,13 +63,13 @@ export default function App() {
             </InactivityGuard>
           }
         >
-          <Route path="/kiosk/new" element={<NewReservationPage />} />
+          <Route path="/reservations" element={<NewReservationPage />} />
           <Route
-            path="/kiosk/reservations/:id/success"
+            path="/reservations/:id/success"
             element={<ReservationSuccessPage />}
           />
           <Route
-            path="/kiosk/reservations/conflict"
+            path="/reservations/conflict"
             element={<ReservationConflictPage />}
           />
         </Route>
@@ -84,9 +84,9 @@ export default function App() {
           </Route>
         </Route>
 
-        {/* Legacy /reserve -> Redirect to Kiosk */}
-        <Route path="/reserve" element={<Navigate to="/kiosk/new" replace />} />
-        <Route path="/reserve/success/:id" element={<Navigate to={`/kiosk/reservations/${window.location.pathname.split('/').pop()}/success`} replace />} />
+        {/* Legacy /reserve -> Redirect to Reservations */}
+        <Route path="/reserve" element={<Navigate to="/reservations" replace />} />
+        <Route path="/reserve/success/:id" element={<Navigate to={`/reservations/${window.location.pathname.split('/').pop()}/success`} replace />} />
 
         {/* Manage Existing Reservation */}
         <Route path="/reservations/manage/:shortId" element={<ManageReservationPage />} />
@@ -95,7 +95,7 @@ export default function App() {
         <Route path="/how-it-works" element={<SystemExplanationPage />} />
 
         {/* Catch-all */}
-        <Route path="*" element={<Navigate to="/kiosk/new" replace />} />
+        <Route path="*" element={<Navigate to="/reservations" replace />} />
       </Routes>
     </ErrorBoundary>
   );

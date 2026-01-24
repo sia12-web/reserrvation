@@ -98,7 +98,7 @@ export default function SystemExplanationPage() {
                     <p className="text-xl font-black">Ready to take control?</p>
                     <div className="flex flex-wrap justify-center gap-4">
                         <a href="/admin/reservations" className="bg-blue-600 hover:bg-blue-700 px-8 py-4 rounded-xl font-black transition-all">Go to Admin Dashboard</a>
-                        <a href="/kiosk/new" className="bg-white text-slate-900 hover:bg-slate-100 px-8 py-4 rounded-xl font-black transition-all">Start Kiosk Demo</a>
+                        <a href="/reservations" className="bg-white text-slate-900 hover:bg-slate-100 px-8 py-4 rounded-xl font-black transition-all">View Reservations Page</a>
                     </div>
                 </div>
             </div>
