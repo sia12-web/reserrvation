@@ -39,7 +39,8 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.0.8",
-    "@types/nodemailer": "^7.0.5"
+    "@types/nodemailer": "^7.0.5",
+    "tsx": "^4.19.0"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
@@ -49,5 +50,8 @@
     "supertest": "^7.2.2",
     "ts-jest": "^29.4.6",
     "typescript": "^5.9.3"
+  },
+  "prisma": {
+    "seed": "npx tsx prisma/seed.ts"
   }
 }
