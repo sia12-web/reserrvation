@@ -51,9 +51,15 @@ export default function SystemExplanationPage() {
                             <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
                                 <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">Scenario C</span>
                                 <h4 className="font-bold text-lg">Large groups (8+ people)</h4>
-                                <p className="text-sm text-slate-600">
-                                    The system automatically <strong>merges</strong> adjacent tables (e.g., T9 + T10).
-                                    Groups of 8 cannot reserve a table meant for 4.
+                                <ul className="text-sm text-slate-600 list-disc list-inside space-y-1">
+                                    <li><strong>3 Tables:</strong> 13–15 People</li>
+                                    <li><strong>4 Tables:</strong> 18–20 People</li>
+                                    <li><strong>5 Tables:</strong> 23–25 People</li>
+                                    <li><strong>6 Tables:</strong> 28–30 People</li>
+                                    <li><strong>7 Tables (Max Combo):</strong> 33–40 People</li>
+                                </ul>
+                                <p className="text-sm text-slate-500 italic mt-2">
+                                    The system automatically calculates the best combination of adjacent tables.
                                 </p>
                             </div>
                         </div>
@@ -81,9 +87,15 @@ export default function SystemExplanationPage() {
                             <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
                                 <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">سناریو پ</span>
                                 <h4 className="font-bold text-lg">گروه‌های بزرگ (۸+ نفر)</h4>
-                                <p className="text-sm text-slate-600">
-                                    سیستم به‌طور خودکار میزهای مجاور (مثلاً T9 + T10) را <strong>ادغام</strong> می‌کند.
-                                    گروه‌های بزرگ نمی‌توانند میزهای کوچک را رزرو کنند، و برعکس.
+                                <ul className="text-sm text-slate-600 list-disc list-inside space-y-1">
+                                    <li><strong>۳ میز:</strong> ۱۳ تا ۱۵ نفر</li>
+                                    <li><strong>۴ میز:</strong> ۱۸ تا ۲۰ نفر</li>
+                                    <li><strong>۵ میز:</strong> ۲۳ تا ۲۵ نفر</li>
+                                    <li><strong>۶ میز:</strong> ۲۸ تا ۳۰ نفر</li>
+                                    <li><strong>۷ میز (حداکثر):</strong> ۳۳ تا ۴۰ نفر</li>
+                                </ul>
+                                <p className="text-sm text-slate-500 italic mt-2">
+                                    سیستم به‌طور خودکار بهترین ترکیب میزهای کنار هم را محاسبه می‌کند.
                                 </p>
                             </div>
                         </div>
