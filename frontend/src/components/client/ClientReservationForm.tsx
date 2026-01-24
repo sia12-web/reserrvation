@@ -122,7 +122,7 @@ export default function ClientReservationForm({ onSuccess }: ClientReservationFo
             },
             timestamp: Date.now(),
           }),
-        }).catch(() => {});
+        }).catch(() => { });
         // #endregion
 
         if (error instanceof ApiError && error.isNetworkError) {
@@ -187,6 +187,7 @@ export default function ClientReservationForm({ onSuccess }: ClientReservationFo
     const payload: ReservationRequest = {
       clientName: clientName.trim(),
       clientPhone: normalizedPhone,
+      clientEmail: clientEmail.trim(),
       partySize,
       startTime: toUtcIso(selectedSlot),
       source: "WEB",
@@ -249,16 +250,18 @@ export default function ClientReservationForm({ onSuccess }: ClientReservationFo
       </div>
 
       <label className="block space-y-2">
-        <span className="text-base font-medium">Email address (optional)</span>
+        <span className="text-base font-medium">Email address</span>
         <input
           type="email"
           className="h-12 w-full rounded-md border border-slate-300 px-4 text-base"
           value={clientEmail}
           onChange={(event) => setClientEmail(event.target.value)}
           placeholder="name@example.com"
-          autoComplete="off"
+          autoComplete="email"
         />
-        <p className="text-xs text-slate-500">Not sent to the reservation system yet.</p>
+        {fieldErrors.clientEmail ? (
+          <span className="text-red-600 text-sm">{fieldErrors.clientEmail}</span>
+        ) : null}
       </label>
 
       <div className="space-y-2">

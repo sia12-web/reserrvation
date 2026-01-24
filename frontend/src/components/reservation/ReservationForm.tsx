@@ -192,7 +192,7 @@ export default function ReservationForm({
     const payload: ReservationRequest = {
       clientName: clientName.trim(),
       clientPhone: normalizedPhone,
-      clientEmail: clientEmail.trim() || undefined,
+      clientEmail: clientEmail.trim(),
       partySize,
       startTime: toUtcIso(selectedSlot),
       source: "KIOSK",
@@ -259,7 +259,7 @@ export default function ReservationForm({
         />
 
         <label className="block space-y-2">
-          <span className="text-lg font-medium">Email (optional)</span>
+          <span className="text-lg font-medium">Email</span>
           <input
             type="email"
             className="h-12 w-full rounded-md border border-slate-300 px-4 text-lg"
