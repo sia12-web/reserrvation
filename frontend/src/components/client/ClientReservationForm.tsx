@@ -303,7 +303,6 @@ export default function ClientReservationForm({ onSuccess }: ClientReservationFo
             const index = slots.findIndex((s) => s.valueOf() === slot.valueOf());
             if (index >= 0) setSlotPage(Math.floor(index / SLOT_PAGE_SIZE));
           }}
-          columns={3}
         />
         <div className="flex gap-2">
           <button
