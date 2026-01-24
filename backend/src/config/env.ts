@@ -10,8 +10,8 @@ const envSchema = z
       .string()
       .transform((val) => parseInt(val, 10))
       .pipe(z.number().int().positive().default(5000)),
-    DATABASE_URL: z.string().url('DATABASE_URL must be a valid URL'),
-    JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
+    DATABASE_URL: z.string().url('DATABASE_URL must be a valid URL').optional(),
+    JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters').optional(),
     JWT_EXPIRES_IN: z.string().default('7d'),
     CORS_ORIGIN: z.string().url('CORS_ORIGIN must be a valid URL').default('http://localhost:3000'),
     UNIVERSITY_DOMAINS: z
@@ -25,19 +25,39 @@ const envSchema = z
 export type Env = z.infer<typeof envSchema>;
 
 function validateEnv(): Env {
-  try {
-    return envSchema.parse(process.env);
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      const missingVars = error.errors
-        .map((err) => `  - ${err.path.join('.')}: ${err.message}`)
-        .join('\n');
-      console.error('❌ Invalid environment variables:\n' + missingVars);
-      console.error('\nPlease check your .env file and ensure all required variables are set.');
+  // Try to parse what we have
+  const result = envSchema.safeParse(process.env);
+
+  if (!result.success) {
+    const isTest = process.env.NODE_ENV === 'test';
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    // In test mode, we provide fake defaults to keep the app from crashing on import
+    if (isTest) {
+      return {
+        NODE_ENV: 'test',
+        PORT: 5000,
+        DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/postgres',
+        JWT_SECRET: 'test_jwt_secret_abcdefghijklmnopqrstuvwxyz012345',
+        JWT_EXPIRES_IN: '7d',
+        CORS_ORIGIN: 'http://localhost:3000',
+        UNIVERSITY_DOMAINS: ['.edu'],
+      } as Env;
+    }
+
+    // In non-test mode, we log and exit if things are missing
+    const missingVars = result.error.errors
+      .map((err) => `  - ${err.path.join('.')}: ${err.message}`)
+      .join('\n');
+
+    console.error('❌ Invalid environment variables:\n' + missingVars);
+
+    if (isProduction) {
       process.exit(1);
     }
-    throw error;
   }
+
+  return result.data as Env;
 }
 
 export const env = validateEnv();

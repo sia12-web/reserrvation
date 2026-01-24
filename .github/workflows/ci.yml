@@ -62,6 +62,7 @@ jobs:
         working-directory: ./backend
         env:
           DATABASE_URL: postgresql://classmatefinder:classmatefinder_test@localhost:5432/classmatefinder_test
+          JWT_SECRET: test_jwt_secret_abcdefghijklmnopqrstuvwxyz012345
         run: npm run test:ci
 
       - name: Run linting
