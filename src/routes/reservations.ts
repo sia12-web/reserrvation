@@ -13,6 +13,7 @@ import { checkAvailability, acquireTableLocks } from "../services/availability";
 import { findBestTableAssignment } from "../services/tableAssignment/engine";
 import { TableConfig } from "../services/tableAssignment/types";
 import { sendReservationConfirmation, sendDepositRequestEmail } from "../services/email";
+import { trySmartReassignment } from "../services/reassignment";
 import rateLimit from "express-rate-limit";
 
 const router = Router();
@@ -113,6 +114,7 @@ router.post(
       .filter((tableId) => !unavailable.includes(tableId));
 
     let tableIds: string[] = [];
+    let reassignmentMoves: { reservationId: string; newTableIds: string[] }[] = [];
 
     if (payload.tableIds && payload.tableIds.length > 0) {
       // Manual selection flow
@@ -174,10 +176,26 @@ router.post(
         adjacency,
       });
 
-      if (!assignment.best) {
-        throw new HttpError(409, "No available tables for the requested time");
+      if (assignment.best) {
+        tableIds = assignment.best.tableIds;
+      } else {
+        // Try Smart Reassignment
+        const reassignment = await trySmartReassignment(prisma, {
+          newPartySize: payload.partySize,
+          startTime,
+          endTime,
+          layoutId: activeLayout.id,
+          allTables: tableConfigs,
+          adjacency,
+        });
+
+        if (reassignment.canReassign) {
+          tableIds = reassignment.assignment.tableIds;
+          reassignmentMoves = reassignment.moves;
+        } else {
+          throw new HttpError(409, "No available tables for the requested time");
+        }
       }
-      tableIds = assignment.best.tableIds;
     }
 
     const shortId = generateShortId();
@@ -213,6 +231,36 @@ router.post(
     try {
       const reservation = await prisma.$transaction(
         async (tx) => {
+          // Execute reassignment moves if any
+          if (reassignmentMoves.length > 0) {
+            for (const move of reassignmentMoves) {
+              // Delete old table assignments
+              await tx.reservationTable.deleteMany({
+                where: { reservationId: move.reservationId },
+              });
+
+              // Create new table assignments
+              await tx.reservationTable.createMany({
+                data: move.newTableIds.map((tid, idx) => ({
+                  reservationId: move.reservationId,
+                  tableId: tid,
+                  layoutId: activeLayout.id,
+                  isPrimary: idx === 0,
+                })),
+              });
+
+              // Log the move
+              await (tx as any).auditLog.create({
+                data: {
+                  reservationId: move.reservationId,
+                  action: "SYSTEM_REASSIGNMENT",
+                  reason: `Moved to accommodate new party of ${payload.partySize}`,
+                  after: { tableIds: move.newTableIds }
+                }
+              });
+            }
+          }
+
           const overlap = await tx.reservationTable.findFirst({
             where: {
               tableId: { in: tableIds },
