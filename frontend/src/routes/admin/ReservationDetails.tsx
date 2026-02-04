@@ -4,6 +4,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchAdminReservation, reassignTables, fetchFloorState } from "../../api/admin.api";
 import { ChevronLeft, Table as TableIcon, Users, Clock, Phone, Mail, Hash, AlertCircle, Loader2, CalendarDays, X, User, Info } from "lucide-react";
 import dayjs from "dayjs";
+import { toRestaurantTime } from "../../utils/time";
+
 import { clsx } from "clsx";
 import { getGeometricCapacity } from "../../utils/tableUtils";
 
@@ -139,10 +141,10 @@ export default function ReservationDetails() {
                             <div>
                                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Date & Window</p>
                                 <p className="font-bold text-lg">
-                                    {dayjs(res.startTime).format("MMM D, YYYY")}
+                                    {toRestaurantTime(res.startTime).format("MMM D, YYYY")}
                                 </p>
                                 <p className="text-slate-500 font-semibold italic">
-                                    {dayjs(res.startTime).format("HH:mm")} - {dayjs(res.endTime).format("HH:mm")}
+                                    {toRestaurantTime(res.startTime).format("HH:mm")} - {toRestaurantTime(res.endTime).format("HH:mm")}
                                 </p>
                             </div>
                         </div>

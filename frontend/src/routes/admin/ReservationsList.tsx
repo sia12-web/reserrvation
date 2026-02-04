@@ -3,6 +3,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchAdminReservations, cancelReservation, createReservation, resetReservations } from "../../api/admin.api";
 import type { ReservationAdmin } from "../../api/admin.api";
 import dayjs from "dayjs";
+import { parseInRestaurantTime, toUtcIso, toRestaurantTime, getRestaurantNow } from "../../utils/time";
+
+
 import { Search as SearchIcon, Phone, Users, Info, CalendarDays, Printer, Trash2, TriangleAlert } from "lucide-react";
 import { clsx } from "clsx";
 import { Link } from "react-router-dom";
@@ -11,7 +14,8 @@ export default function ReservationsList() {
     const queryClient = useQueryClient();
     const [filterStatus, setFilterStatus] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
-    const [filterDate, setFilterDate] = useState(dayjs().format("YYYY-MM-DD"));
+    const [filterDate, setFilterDate] = useState(getRestaurantNow().format("YYYY-MM-DD"));
+
     const [viewMode, setViewMode] = useState<'day' | 'upcoming'>('day');
 
     // Reset modal state
@@ -28,7 +32,8 @@ export default function ReservationsList() {
         clientName: "",
         clientPhone: "",
         partySize: 2,
-        date: dayjs().format("YYYY-MM-DD"),
+        date: getRestaurantNow().format("YYYY-MM-DD"),
+
         time: "19:00",
         internalNotes: ""
     });
@@ -47,7 +52,7 @@ export default function ReservationsList() {
             clientName: data.clientName,
             clientPhone: data.clientPhone,
             partySize: data.partySize,
-            startTime: dayjs(`${data.date} ${data.time}`).toISOString(),
+            startTime: toUtcIso(parseInRestaurantTime(data.date, data.time)),
             internalNotes: data.internalNotes
         }),
         onSuccess: () => {
@@ -57,7 +62,8 @@ export default function ReservationsList() {
                 clientName: "",
                 clientPhone: "",
                 partySize: 2,
-                date: dayjs().format("YYYY-MM-DD"),
+                date: getRestaurantNow().format("YYYY-MM-DD"),
+
                 time: "19:00",
                 internalNotes: ""
             });
@@ -88,8 +94,9 @@ export default function ReservationsList() {
                     // fetch future events (default limit applies)
                 });
             }
-            const startOfDay = dayjs(filterDate).startOf('day').toISOString();
-            const endOfDay = dayjs(filterDate).endOf('day').toISOString();
+            const d = parseInRestaurantTime(filterDate, "00:00");
+            const startOfDay = d.startOf('day').toISOString();
+            const endOfDay = d.endOf('day').toISOString();
             return fetchAdminReservations({
                 status: filterStatus,
                 from: startOfDay,
@@ -149,7 +156,7 @@ export default function ReservationsList() {
             </style>
 
             <div className="print-header">
-                <h1 className="text-2xl font-black">Daily Reservations - {dayjs(filterDate).format("dddd, MMMM D, YYYY")}</h1>
+                <h1 className="text-2xl font-black">Daily Reservations - {toRestaurantTime(filterDate).format("dddd, MMMM D, YYYY")}</h1>
                 <p className="text-slate-500">Diba Restaurant Seating List</p>
             </div>
 
@@ -177,10 +184,10 @@ export default function ReservationsList() {
 
                     <div className="flex bg-slate-100 p-1 rounded-xl">
                         <button
-                            onClick={() => { setViewMode('day'); setFilterDate(dayjs().format("YYYY-MM-DD")); }}
+                            onClick={() => { setViewMode('day'); setFilterDate(getRestaurantNow().format("YYYY-MM-DD")); }}
                             className={clsx(
                                 "px-3 py-1 text-xs font-bold rounded-lg transition-colors border",
-                                viewMode === 'day' && filterDate === dayjs().format("YYYY-MM-DD")
+                                viewMode === 'day' && filterDate === getRestaurantNow().format("YYYY-MM-DD")
                                     ? "text-blue-600 bg-blue-50 border-blue-200"
                                     : "text-slate-500 bg-white border-slate-200 hover:bg-slate-50"
                             )}
@@ -188,16 +195,17 @@ export default function ReservationsList() {
                             Today
                         </button>
                         <button
-                            onClick={() => { setViewMode('day'); setFilterDate(dayjs().add(1, 'day').format("YYYY-MM-DD")); }}
+                            onClick={() => { setViewMode('day'); setFilterDate(getRestaurantNow().add(1, 'day').format("YYYY-MM-DD")); }}
                             className={clsx(
                                 "px-3 py-1 text-xs font-bold rounded-lg transition-colors border",
-                                viewMode === 'day' && filterDate === dayjs().add(1, 'day').format("YYYY-MM-DD")
+                                viewMode === 'day' && filterDate === getRestaurantNow().add(1, 'day').format("YYYY-MM-DD")
                                     ? "text-blue-600 bg-blue-50 border-blue-200"
                                     : "text-slate-500 bg-white border-slate-200 hover:bg-slate-50"
                             )}
                         >
                             Tomorrow
                         </button>
+
                         <button
                             onClick={() => { setViewMode('upcoming'); setFilterStatus('CONFIRMED'); }}
                             className={clsx(
@@ -284,8 +292,8 @@ export default function ReservationsList() {
                                     </td>
                                     <td className="px-4 py-3 whitespace-nowrap text-sm">
                                         <div className="flex flex-col">
-                                            <span className="font-semibold">{dayjs(res.startTime).format("MMM D, YYYY")}</span>
-                                            <span className="text-slate-500">{dayjs(res.startTime).format("HH:mm")} - {dayjs(res.endTime).format("HH:mm")}</span>
+                                            <span className="font-semibold">{toRestaurantTime(res.startTime).format("MMM D, YYYY")}</span>
+                                            <span className="text-slate-500">{toRestaurantTime(res.startTime).format("HH:mm")} - {toRestaurantTime(res.endTime).format("HH:mm")}</span>
                                         </div>
                                     </td>
                                     <td className="px-4 py-3 whitespace-nowrap">
@@ -454,12 +462,12 @@ export default function ReservationsList() {
                                     <label className="text-xs font-black uppercase tracking-widest text-slate-400 block mb-2">Quick Dates</label>
                                     <div className="flex flex-wrap gap-2 mb-2">
                                         {[
-                                            { label: "Today", date: dayjs() },
-                                            { label: "Tomorrow", date: dayjs().add(1, 'day') },
-                                            { label: "Fri", date: dayjs().day(5).isBefore(dayjs()) ? dayjs().add(1, 'week').day(5) : dayjs().day(5) },
-                                            { label: "Sat", date: dayjs().day(6).isBefore(dayjs()) ? dayjs().add(1, 'week').day(6) : dayjs().day(6) },
-                                            { label: "Next Fri", date: dayjs().add(1, 'week').day(5) },
-                                            { label: "Next Sat", date: dayjs().add(1, 'week').day(6) },
+                                            { label: "Today", date: getRestaurantNow() },
+                                            { label: "Tomorrow", date: getRestaurantNow().add(1, 'day') },
+                                            { label: "Fri", date: getRestaurantNow().day(5).isBefore(getRestaurantNow()) ? getRestaurantNow().add(1, 'week').day(5) : getRestaurantNow().day(5) },
+                                            { label: "Sat", date: getRestaurantNow().day(6).isBefore(getRestaurantNow()) ? getRestaurantNow().add(1, 'week').day(6) : getRestaurantNow().day(6) },
+                                            { label: "Next Fri", date: getRestaurantNow().add(1, 'week').day(5) },
+                                            { label: "Next Sat", date: getRestaurantNow().add(1, 'week').day(6) },
                                         ].map((item, idx) => {
                                             // Deduplicate: Don't show "Fri" if it's the same as "Today" or "Tomorrow"
                                             if (idx > 1 && (item.date.isSame(dayjs(), 'day') || item.date.isSame(dayjs().add(1, 'day'), 'day'))) return null;

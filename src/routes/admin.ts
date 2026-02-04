@@ -4,7 +4,8 @@ import { asyncHandler } from "../utils/asyncHandler";
 import { HttpError } from "../middleware/errorHandler";
 import { adminAuth } from "../middleware/auth";
 import { z } from "zod";
-import { alignToSlotInterval, calculateDurationMinutes, isWithinBusinessHours } from "../utils/time";
+import { alignToSlotInterval, calculateDurationMinutes, isWithinBusinessHours, getStartAndEndOfDay } from "../utils/time";
+
 import { checkAvailability } from "../services/availability";
 import { findBestTableAssignment } from "../services/tableAssignment/engine";
 import { TableConfig } from "../services/tableAssignment/types";
@@ -205,13 +206,9 @@ router.get(
         let endTime: Date;
 
         if (date) {
-            // Parse the date as YYYY-MM-DD and treat it as local restaurant time (EST = UTC-5)
-            // The frontend sends "2026-01-22" meaning Jan 22 in local time
-            const [year, month, day] = (date as string).split('-').map(Number);
-            // Create dates in EST: midnight to 11:59:59 PM
-            // EST is UTC-5, so midnight EST = 05:00 UTC
-            startTime = new Date(Date.UTC(year, month - 1, day, 5, 0, 0, 0)); // 00:00 EST = 05:00 UTC
-            endTime = new Date(Date.UTC(year, month - 1, day + 1, 4, 59, 59, 999)); // 23:59:59 EST = 04:59:59 UTC next day
+            const { start, end } = getStartAndEndOfDay(date as string);
+            startTime = start;
+            endTime = end;
         } else {
             // Default "Live View": -15 mins to +4 hours
             startTime = from ? new Date(from as string) : new Date(now.getTime() - 15 * 60000);

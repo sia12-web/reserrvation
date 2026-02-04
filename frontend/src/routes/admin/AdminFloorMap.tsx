@@ -4,12 +4,16 @@ import { fetchFloorState, freeTable, createWalkin } from "../../api/admin.api";
 import FloorMap from "../../components/reservation/FloorMap";
 import { UserPlus, Power, Info, AlertCircle, CheckCircle2, Loader2, ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
 import dayjs from "dayjs";
+import { toRestaurantTime, getRestaurantNow } from "../../utils/time";
+
+
 import { clsx } from "clsx";
 
 export default function AdminFloorMap() {
     const queryClient = useQueryClient();
     const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
-    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+    const [selectedDate, setSelectedDate] = useState(() => toRestaurantTime(new Date().toISOString()).format("YYYY-MM-DD"));
+
     const [isWalkinModalOpen, setIsWalkinModalOpen] = useState(false);
     const [isFreeModalOpen, setIsFreeModalOpen] = useState(false);
     const [reason, setReason] = useState("");
@@ -21,7 +25,8 @@ export default function AdminFloorMap() {
         refetchInterval: 5000,
     });
 
-    const isToday = selectedDate === new Date().toISOString().split('T')[0];
+    const isToday = selectedDate === toRestaurantTime(new Date().toISOString()).format("YYYY-MM-DD");
+
 
     // Helper to change date by offset
     const changeDate = (offset: number) => {
@@ -32,18 +37,20 @@ export default function AdminFloorMap() {
 
 
 
+    const now = getRestaurantNow();
+
     const getNextBusyDay = (dayNum: number) => {
-        let d = dayjs().day(dayNum);
+        let d = now.day(dayNum);
         // If the day is today or already passed this week, skip to next week
-        if (d.isSame(dayjs(), 'day') || d.isSame(dayjs().add(1, 'day'), 'day') || d.isBefore(dayjs(), 'day')) {
+        if (d.isSame(now, 'day') || d.isSame(now.add(1, 'day'), 'day') || d.isBefore(now, 'day')) {
             d = d.add(1, 'week');
         }
         return d;
     };
 
     const quickDates = [
-        { label: "Today", date: dayjs() },
-        { label: "Tomorrow", date: dayjs().add(1, 'day') },
+        { label: "Today", date: now },
+        { label: "Tomorrow", date: now.add(1, 'day') },
         { label: "Next Fri", date: getNextBusyDay(5) },
         { label: "Next Sat", date: getNextBusyDay(6) },
         { label: "Next Sun", date: getNextBusyDay(0) },
@@ -232,7 +239,7 @@ export default function AdminFloorMap() {
                                                             <span className="text-xs font-mono text-slate-400">#{res.shortId}</span>
                                                         </div>
                                                         <div className="flex justify-between items-center text-xs text-slate-500">
-                                                            <span>{start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                            <span>{toRestaurantTime(res.startTime).format("HH:mm")} - {toRestaurantTime(res.endTime).format("HH:mm")}</span>
                                                             <span className={clsx(
                                                                 "px-1.5 py-0.5 rounded font-bold text-[10px]",
                                                                 res.status === 'CONFIRMED' ? "bg-emerald-100 text-emerald-700" :

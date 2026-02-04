@@ -62,3 +62,11 @@ export function getClosingTime(date: Date): Date {
   return d.hour(closingHours).minute(0).second(0).millisecond(0).toDate();
 }
 
+export function getStartAndEndOfDay(date: string): { start: Date; end: Date } {
+  const d = dayjs.tz(date, RESTAURANT_TZ);
+  return {
+    start: d.startOf("day").toDate(),
+    end: d.endOf("day").toDate(),
+  };
+}
+

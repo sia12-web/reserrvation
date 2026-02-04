@@ -104,6 +104,10 @@ export function addMinutesInRestaurant(iso: string, minutes: number): Dayjs {
   return toRestaurantTime(iso).add(minutes, "minute");
 }
 
+export function parseInRestaurantTime(date: string, time: string): Dayjs {
+  return dayjs.tz(`${date} ${time}`, RESTAURANT_TIMEZONE);
+}
+
 export function formatTime(time: Dayjs): string {
   return time.format("h:mm A");
 }

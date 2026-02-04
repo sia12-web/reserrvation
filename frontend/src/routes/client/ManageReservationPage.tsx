@@ -15,6 +15,8 @@ import {
     ArrowRight
 } from "lucide-react";
 import dayjs from "dayjs";
+import { toRestaurantTime, getRestaurantNow } from "../../utils/time";
+
 import clsx from "clsx";
 
 export default function ManageReservationPage() {
@@ -71,8 +73,9 @@ export default function ManageReservationPage() {
     }
 
     const isCancelled = reservation.status === "CANCELLED";
-    const start = dayjs(reservation.startTime);
-    const isPast = start.isBefore(dayjs());
+    const start = toRestaurantTime(reservation.startTime);
+    const isPast = start.isBefore(getRestaurantNow());
+
 
     return (
         <ClientShell
