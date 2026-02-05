@@ -16,7 +16,7 @@ const realRedlock = new Redlock([redis], {
 export const redlock = (env.nodeEnv === 'test' || process.env.USE_MOCK_REDIS === 'true')
   ? {
     acquire: async (resources: string[], duration: number) => {
-      console.warn("Using MOCK redlock acquisition for:", resources);
+      console.warn(`Using MOCK redlock acquisition (NODE_ENV=${env.nodeEnv}, USE_MOCK=${process.env.USE_MOCK_REDIS}) for:`, resources);
       return {
         release: async () => {
           // no-op

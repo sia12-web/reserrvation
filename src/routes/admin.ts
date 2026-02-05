@@ -861,16 +861,18 @@ router.post(
         const now = new Date();
 
         // Find the current active reservation for this table
+        // Relaxed window: Covers reservations that just ended (within 15m) or are about to start (within 15m)
         const reservationTable = await prisma.reservationTable.findFirst({
             where: {
                 tableId,
                 reservation: {
                     status: { in: ["CHECKED_IN", "CONFIRMED", "PENDING_DEPOSIT"] },
-                    startTime: { lte: now },
-                    endTime: { gte: now },
+                    startTime: { lte: new Date(now.getTime() + 15 * 60000) },
+                    endTime: { gte: new Date(now.getTime() - 15 * 60000) },
                 },
             },
             include: { reservation: true },
+            orderBy: { reservation: { startTime: 'asc' } } // Pick the one starting earliest (current one)
         });
 
         if (!reservationTable) {
