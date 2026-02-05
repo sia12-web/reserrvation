@@ -13,7 +13,7 @@ import { checkAvailability, acquireTableLocks } from "../services/availability";
 import { findBestTableAssignment } from "../services/tableAssignment/engine";
 import { TableConfig } from "../services/tableAssignment/types";
 import { sendReservationConfirmation, sendDepositRequestEmail } from "../services/email";
-import { notifyNewReservation, notifyCancelledReservation } from "../services/telegram";
+import { notifyCancelledReservation } from "../services/telegram";
 import { trySmartReassignment } from "../services/reassignment";
 import rateLimit from "express-rate-limit";
 import { maskPII } from "../utils/masking";
@@ -347,17 +347,6 @@ router.post(
         }
       }
 
-      // Send Telegram notification (fire and forget)
-      notifyNewReservation({
-        shortId: reservation.shortId,
-        clientName: reservation.clientName,
-        clientPhone: reservation.clientPhone,
-        partySize: reservation.partySize,
-        startTime: reservation.startTime,
-        status: reservation.status,
-        customerNotes: reservation.customerNotes,
-        tableIds,
-      }).catch(err => console.error("Telegram notification error:", err));
 
       res.status(201).json({
         reservationId: reservation.id,
