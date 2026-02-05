@@ -87,9 +87,16 @@ export default function ReservationsList() {
     const { data: reservations, isLoading, error } = useQuery({
         queryKey: ["admin_reservations", filterStatus, filterDate, viewMode],
         queryFn: () => {
+            let statusParam = filterStatus;
+
+            // If in upcoming mode and no specific status filter is selected, show both active statuses
+            if (viewMode === 'upcoming' && !statusParam) {
+                statusParam = "CONFIRMED,PENDING_DEPOSIT";
+            }
+
             if (viewMode === 'upcoming') {
                 return fetchAdminReservations({
-                    status: filterStatus,
+                    status: statusParam,
                     from: new Date().toISOString(),
                     // fetch future events (default limit applies)
                 });
@@ -98,12 +105,13 @@ export default function ReservationsList() {
             const startOfDay = d.startOf('day').toISOString();
             const endOfDay = d.endOf('day').toISOString();
             return fetchAdminReservations({
-                status: filterStatus,
+                status: statusParam,
                 from: startOfDay,
                 to: endOfDay
             });
         },
         refetchInterval: 15000,
+        enabled: viewMode === 'upcoming' || (!!filterDate && dayjs(filterDate).isValid())
     });
 
     const filtered = (reservations || []).filter((r: ReservationAdmin) =>
@@ -147,7 +155,7 @@ export default function ReservationsList() {
             </style>
 
             <div className="print-header">
-                <h1 className="text-2xl font-black">Daily Reservations - {parseInRestaurantTime(filterDate, "00:00").format("dddd, MMMM D, YYYY")}</h1>
+                <h1 className="text-2xl font-black">Daily Reservations - {dayjs(filterDate).isValid() ? parseInRestaurantTime(filterDate, "00:00").format("dddd, MMMM D, YYYY") : "Please select a valid date"}</h1>
                 <p className="text-slate-500">Diba Restaurant Seating List</p>
             </div>
 
@@ -198,7 +206,7 @@ export default function ReservationsList() {
                         </button>
 
                         <button
-                            onClick={() => { setViewMode('upcoming'); setFilterStatus('CONFIRMED'); }}
+                            onClick={() => { setViewMode('upcoming'); setFilterStatus(''); }}
                             className={clsx(
                                 "px-3 py-1 text-xs font-bold rounded-lg transition-colors border",
                                 viewMode === 'upcoming'
@@ -229,6 +237,7 @@ export default function ReservationsList() {
                     >
                         <option value="">All Statuses</option>
                         <option value="CONFIRMED">Confirmed</option>
+                        <option value="PENDING_DEPOSIT">Pending Deposit</option>
                         <option value="CHECKED_IN">Checked In</option>
                         <option value="COMPLETED">Completed</option>
                         <option value="CANCELLED">Cancelled</option>

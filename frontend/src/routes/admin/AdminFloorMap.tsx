@@ -19,10 +19,11 @@ export default function AdminFloorMap() {
     const [reason, setReason] = useState("");
     const [partySize, setPartySize] = useState(2);
 
-    const { data: floor, isLoading } = useQuery({
+    const { data: floor, isLoading, error } = useQuery({
         queryKey: ["admin_floor_state", selectedDate],
         queryFn: () => fetchFloorState(selectedDate),
         refetchInterval: 5000,
+        enabled: !!selectedDate && dayjs(selectedDate).isValid()
     });
 
     const isToday = selectedDate === toRestaurantTime(new Date().toISOString()).format("YYYY-MM-DD");
@@ -162,6 +163,12 @@ export default function AdminFloorMap() {
                         <div className="flex-grow flex flex-col items-center justify-center gap-4">
                             <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
                             <p className="text-slate-500 font-medium">Loading floor plan...</p>
+                        </div>
+                    ) : error ? (
+                        <div className="flex-grow flex flex-col items-center justify-center gap-4 text-red-600">
+                            <AlertCircle className="w-12 h-12 opacity-50" />
+                            <p className="text-lg font-bold">Failed to load floor state</p>
+                            <p className="text-slate-500 text-sm">Please check your connection or select a valid date.</p>
                         </div>
                     ) : floor && (
                         <div className="flex-grow flex items-center justify-center relative">

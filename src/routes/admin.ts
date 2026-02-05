@@ -138,12 +138,23 @@ router.get(
 
         if (query.from || query.to) {
             where.startTime = {};
-            if (query.from) where.startTime.gte = new Date(query.from);
-            if (query.to) where.startTime.lte = new Date(query.to);
+            if (query.from) {
+                const d = new Date(query.from);
+                if (!isNaN(d.getTime())) where.startTime.gte = d;
+            }
+            if (query.to) {
+                const d = new Date(query.to);
+                if (!isNaN(d.getTime())) where.startTime.lte = d;
+            }
+            if (Object.keys(where.startTime).length === 0) delete where.startTime;
         }
 
         if (query.status) {
-            where.status = query.status;
+            if (query.status.includes(",")) {
+                where.status = { in: query.status.split(",").filter(s => s.trim().length > 0) };
+            } else {
+                where.status = query.status;
+            }
         }
 
         if (query.phone) {
