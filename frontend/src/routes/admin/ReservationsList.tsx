@@ -6,7 +6,7 @@ import dayjs from "dayjs";
 import { parseInRestaurantTime, toUtcIso, toRestaurantTime, getRestaurantNow } from "../../utils/time";
 
 
-import { Search as SearchIcon, Phone, Users, Info, CalendarDays, Printer, Trash2, TriangleAlert } from "lucide-react";
+import { Search as SearchIcon, Phone, Users, CalendarDays, Printer, Trash2, TriangleAlert } from "lucide-react";
 import { clsx } from "clsx";
 import { Link } from "react-router-dom";
 
@@ -112,15 +112,6 @@ export default function ReservationsList() {
         r.shortId.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    if (isLoading) return <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-    </div>;
-
-    if (error) return <div className="bg-red-50 border border-red-200 text-red-700 p-6 rounded-2xl flex items-center gap-3">
-        <Info className="w-6 h-6" />
-        <p className="font-semibold">Failed to load reservations. Please check your connection.</p>
-    </div>;
-
     return (
         <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
             <style>
@@ -156,7 +147,7 @@ export default function ReservationsList() {
             </style>
 
             <div className="print-header">
-                <h1 className="text-2xl font-black">Daily Reservations - {toRestaurantTime(filterDate).format("dddd, MMMM D, YYYY")}</h1>
+                <h1 className="text-2xl font-black">Daily Reservations - {parseInRestaurantTime(filterDate, "00:00").format("dddd, MMMM D, YYYY")}</h1>
                 <p className="text-slate-500">Diba Restaurant Seating List</p>
             </div>
 
@@ -227,21 +218,13 @@ export default function ReservationsList() {
                     </button>
                     <input
                         type="date"
-                        className={clsx(
-                            "px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500 transition-all font-semibold text-slate-700 bg-white",
-                            viewMode === 'upcoming' && "opacity-50"
-                        )}
-                        value={viewMode === 'day' ? filterDate : ""}
-                        disabled={viewMode === 'upcoming'}
+                        className="px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500 transition-all font-semibold text-slate-700 bg-white"
+                        value={filterDate}
                         onChange={(e) => { setViewMode('day'); setFilterDate(e.target.value); }}
                     />
                     <select
-                        className={clsx(
-                            "flex-grow md:flex-grow-0 px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500 transition-all font-semibold text-slate-700 appearance-none bg-white cursor-pointer",
-                            viewMode === 'upcoming' && "opacity-70 bg-slate-100 cursor-not-allowed"
-                        )}
+                        className="flex-grow md:flex-grow-0 px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500 transition-all font-semibold text-slate-700 appearance-none bg-white cursor-pointer"
                         value={filterStatus}
-                        disabled={viewMode === 'upcoming'}
                         onChange={(e) => setFilterStatus(e.target.value)}
                     >
                         <option value="">All Statuses</option>
@@ -260,93 +243,105 @@ export default function ReservationsList() {
                 </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="bg-slate-50 border-b border-slate-100">
-                                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">ID</th>
-                                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Guest</th>
-                                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Time</th>
-                                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Party</th>
-                                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Tables</th>
-                                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider no-print">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                            {filtered.map((res: ReservationAdmin) => (
-                                <tr key={res.id} className="hover:bg-slate-50/80 transition-colors group">
-                                    <td className="px-4 py-3 whitespace-nowrap">
-                                        <span className="font-mono text-xs font-black bg-slate-100 px-2 py-1.5 rounded text-slate-700 border border-slate-200">
-                                            #{res.shortId}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <div className="flex flex-col">
-                                            <span className="font-bold text-slate-900">{res.clientName}</span>
-                                            <div className="flex items-center gap-3 text-slate-500 text-xs mt-1">
-                                                <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {res.clientPhone}</span>
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden relative min-h-[400px]">
+                {isLoading ? (
+                    <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                    </div>
+                ) : error ? (
+                    <div className="p-12 text-center text-red-600">
+                        <TriangleAlert className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                        <p className="text-lg font-bold">Failed to load reservations</p>
+                        <p className="text-slate-500 text-sm">Please check your connection or try refreshing.</p>
+                    </div>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left">
+                            <thead>
+                                <tr className="bg-slate-50 border-b border-slate-100">
+                                    <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">ID</th>
+                                    <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Guest</th>
+                                    <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Time</th>
+                                    <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Party</th>
+                                    <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Tables</th>
+                                    <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                                    <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider no-print">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {filtered.map((res: ReservationAdmin) => (
+                                    <tr key={res.id} className="hover:bg-slate-50/80 transition-colors group">
+                                        <td className="px-4 py-3 whitespace-nowrap">
+                                            <span className="font-mono text-xs font-black bg-slate-100 px-2 py-1.5 rounded text-slate-700 border border-slate-200">
+                                                #{res.shortId}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <div className="flex flex-col">
+                                                <span className="font-bold text-slate-900">{res.clientName}</span>
+                                                <div className="flex items-center gap-3 text-slate-500 text-xs mt-1">
+                                                    <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {res.clientPhone}</span>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-3 whitespace-nowrap text-sm">
-                                        <div className="flex flex-col">
-                                            <span className="font-semibold">{toRestaurantTime(res.startTime).format("MMM D, YYYY")}</span>
-                                            <span className="text-slate-500">{toRestaurantTime(res.startTime).format("HH:mm")} - {toRestaurantTime(res.endTime).format("HH:mm")}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-3 whitespace-nowrap">
-                                        <div className="flex items-center gap-1.5 font-bold text-slate-700">
-                                            <Users className="w-4 h-4 text-slate-400" />
-                                            {res.partySize}
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-3 whitespace-nowrap">
-                                        <div className="flex flex-wrap gap-1.5 min-w-[120px] max-w-[200px]">
-                                            {res.tableIds.map((tid: string) => (
-                                                <span key={tid} className="bg-blue-50 text-blue-800 px-3 py-1.5 rounded-lg text-[13px] font-black border border-blue-200 shadow-sm transition-transform hover:scale-105">
-                                                    {tid}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-3 whitespace-nowrap">
-                                        <StatusBadge status={res.status} />
-                                    </td>
-                                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium no-print">
-                                        <div className="flex gap-2">
-                                            {["CONFIRMED", "PENDING_DEPOSIT"].includes(res.status) && (
-                                                <button
-                                                    onClick={() => { setSelectedResId(res.id); setIsCancelModalOpen(true); }}
-                                                    className="text-red-600 hover:text-red-900 font-bold px-3 py-1.5 rounded-lg hover:bg-red-50 transition-all border border-transparent hover:border-red-100"
+                                        </td>
+                                        <td className="px-4 py-3 whitespace-nowrap text-sm">
+                                            <div className="flex flex-col">
+                                                <span className="font-semibold">{toRestaurantTime(res.startTime).format("MMM D, YYYY")}</span>
+                                                <span className="text-slate-500">{toRestaurantTime(res.startTime).format("HH:mm")} - {toRestaurantTime(res.endTime).format("HH:mm")}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-3 whitespace-nowrap">
+                                            <div className="flex items-center gap-1.5 font-bold text-slate-700">
+                                                <Users className="w-4 h-4 text-slate-400" />
+                                                {res.partySize}
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-3 whitespace-nowrap">
+                                            <div className="flex flex-wrap gap-1.5 min-w-[120px] max-w-[200px]">
+                                                {res.tableIds.map((tid: string) => (
+                                                    <span key={tid} className="bg-blue-50 text-blue-800 px-3 py-1.5 rounded-lg text-[13px] font-black border border-blue-200 shadow-sm transition-transform hover:scale-105">
+                                                        {tid}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-3 whitespace-nowrap">
+                                            <StatusBadge status={res.status} />
+                                        </td>
+                                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium no-print">
+                                            <div className="flex gap-2">
+                                                {["CONFIRMED", "PENDING_DEPOSIT"].includes(res.status) && (
+                                                    <button
+                                                        onClick={() => { setSelectedResId(res.id); setIsCancelModalOpen(true); }}
+                                                        className="text-red-600 hover:text-red-900 font-bold px-3 py-1.5 rounded-lg hover:bg-red-50 transition-all border border-transparent hover:border-red-100"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                )}
+                                                <Link
+                                                    to={`/admin/reservations/${res.id}`}
+                                                    className="text-blue-600 hover:text-blue-900 font-bold px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-all border border-transparent hover:border-blue-100"
                                                 >
-                                                    Cancel
-                                                </button>
-                                            )}
-                                            <Link
-                                                to={`/admin/reservations/${res.id}`}
-                                                className="text-blue-600 hover:text-blue-900 font-bold px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-all border border-transparent hover:border-blue-100"
-                                            >
-                                                Details
-                                            </Link>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                            {filtered.length === 0 && (
-                                <tr>
-                                    <td colSpan={7} className="px-6 py-12 text-center text-slate-400">
-                                        <div className="flex flex-col items-center gap-2">
-                                            <CalendarDays className="w-12 h-12 opacity-20" />
-                                            <p className="text-lg font-medium">No reservations found</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                                    Details
+                                                </Link>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {filtered.length === 0 && (
+                                    <tr>
+                                        <td colSpan={7} className="px-6 py-12 text-center text-slate-400">
+                                            <div className="flex flex-col items-center gap-2">
+                                                <CalendarDays className="w-12 h-12 opacity-20" />
+                                                <p className="text-lg font-medium">No reservations found</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </div>
 
             {/* Reset Confirmation Modal */}

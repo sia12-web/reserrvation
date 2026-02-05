@@ -75,12 +75,7 @@ export default function AdminFloorMap() {
         },
     });
 
-    if (isLoading) return (
-        <div className="flex flex-col items-center justify-center min-h-[600px] gap-4">
-            <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
-            <p className="text-slate-500 font-medium animate-pulse">Loading floor state...</p>
-        </div>
-    );
+    // if (isLoading) handled inside main return to keep layout stable
 
     const selectedTable = floor?.tables.find(t => t.id === selectedTableId);
 
@@ -163,8 +158,20 @@ export default function AdminFloorMap() {
                         </div>
                     </div>
 
-                    {floor && (
-                        <div className="flex-grow flex items-center justify-center">
+                    {isLoading && !floor ? (
+                        <div className="flex-grow flex flex-col items-center justify-center gap-4">
+                            <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
+                            <p className="text-slate-500 font-medium">Loading floor plan...</p>
+                        </div>
+                    ) : floor && (
+                        <div className="flex-grow flex items-center justify-center relative">
+                            {isLoading && (
+                                <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px] z-20 flex items-center justify-center rounded-xl">
+                                    <div className="bg-white/80 p-4 rounded-full shadow-lg border border-slate-100">
+                                        <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+                                    </div>
+                                </div>
+                            )}
                             <FloorMap
                                 layout={{ layoutId: floor.layoutId, tables: floor.tables as any, name: "Floor View" }}
                                 selectedTableIds={selectedTableId ? [selectedTableId] : []}
