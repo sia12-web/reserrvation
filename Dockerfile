@@ -18,6 +18,7 @@ RUN npx prisma generate
 
 # Copy source code
 COPY tsconfig.json ./
+COPY tsconfig.build.json ./
 COPY src ./src/
 
 # Build TypeScript
