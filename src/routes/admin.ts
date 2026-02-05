@@ -185,7 +185,7 @@ router.get(
             take: query.limit,
             skip: query.cursor ? 1 : 0,
             cursor: query.cursor ? { id: query.cursor } : undefined,
-            orderBy: { startTime: "desc" },
+            orderBy: { startTime: "asc" },
             include: {
                 reservationTables: true,
             },
