@@ -447,10 +447,11 @@ router.post(
             let tableIds: string[] = [];
 
             if (payload.tableIds && payload.tableIds.length > 0) {
-                // Validation for manual selection (simplified for admin, but still checking overlap)
+                // Admin Override: Allow force assignment even if table technically "unavailable"
+                // This allows squeezing in walk-ins before a reservation starts, or double-booking if needed.
                 const conflictIds = payload.tableIds.filter((id) => unavailable.includes(id));
                 if (conflictIds.length > 0) {
-                    throw new HttpError(409, `Tables ${conflictIds.join(", ")} are occupied`);
+                    console.warn(`Admin forcing walk-in on unavailable tables: ${conflictIds.join(", ")}`);
                 }
                 tableIds = payload.tableIds;
             } else {
