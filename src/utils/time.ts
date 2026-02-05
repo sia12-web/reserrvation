@@ -62,11 +62,22 @@ export function getClosingTime(date: Date): Date {
   return d.hour(closingHours).minute(0).second(0).millisecond(0).toDate();
 }
 
+export function parseSafeDate(dateStr: any): Date | null {
+  if (!dateStr) return null;
+  const d = dayjs(dateStr);
+  if (!d.isValid()) return null;
+
+  // Logical check for extreme dates (e.g., year 0 or far future)
+  const year = d.year();
+  if (year < 2020 || year > 2100) return null;
+
+  return d.toDate();
+}
+
 export function getStartAndEndOfDay(date: string): { start: Date; end: Date } {
-  let d = dayjs.tz(date, RESTAURANT_TZ);
-  if (!d.isValid()) {
-    d = dayjs().tz(RESTAURANT_TZ);
-  }
+  const parsed = parseSafeDate(date);
+  let d = parsed ? dayjs(parsed).tz(RESTAURANT_TZ) : dayjs().tz(RESTAURANT_TZ);
+
   return {
     start: d.startOf("day").toDate(),
     end: d.endOf("day").toDate(),

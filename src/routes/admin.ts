@@ -4,7 +4,7 @@ import { asyncHandler } from "../utils/asyncHandler";
 import { HttpError } from "../middleware/errorHandler";
 import { adminAuth } from "../middleware/auth";
 import { z } from "zod";
-import { alignToSlotInterval, calculateDurationMinutes, isWithinBusinessHours, getStartAndEndOfDay } from "../utils/time";
+import { alignToSlotInterval, calculateDurationMinutes, isWithinBusinessHours, getStartAndEndOfDay, parseSafeDate } from "../utils/time";
 
 import { checkAvailability } from "../services/availability";
 import { findBestTableAssignment } from "../services/tableAssignment/engine";
@@ -18,7 +18,7 @@ const router = Router();
 
 const adminActionLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 1000000, // Unlimited for testing
+    limit: 1000, // 1000 actions per 15 mins
     message: { error: "Too many admin actions, please slow down" },
 });
 
@@ -146,12 +146,12 @@ router.get(
         if (query.from || query.to) {
             where.startTime = {};
             if (query.from) {
-                const d = new Date(query.from);
-                if (!isNaN(d.getTime())) where.startTime.gte = d;
+                const d = parseSafeDate(query.from);
+                if (d) where.startTime.gte = d;
             }
             if (query.to) {
-                const d = new Date(query.to);
-                if (!isNaN(d.getTime())) where.startTime.lte = d;
+                const d = parseSafeDate(query.to);
+                if (d) where.startTime.lte = d;
             }
             if (Object.keys(where.startTime).length === 0) delete where.startTime;
         }
@@ -243,8 +243,10 @@ router.get(
             endTime = end;
         } else {
             // Default "Live View": -15 mins to +4 hours
-            startTime = from ? new Date(from as string) : new Date(now.getTime() - 15 * 60000);
-            endTime = to ? new Date(to as string) : new Date(now.getTime() + 4 * 3600000);
+            const fromDate = parseSafeDate(from);
+            const toDate = parseSafeDate(to);
+            startTime = fromDate || new Date(now.getTime() - 15 * 60000);
+            endTime = toDate || new Date(now.getTime() + 4 * 3600000);
         }
 
         const layout = await prisma.layout.findFirst({
@@ -526,7 +528,11 @@ router.post(
     "/reservations",
     asyncHandler(async (req, res) => {
         const payload = createReservationSchema.parse(req.body);
-        const startTime = new Date(payload.startTime);
+        const startTime = parseSafeDate(payload.startTime);
+
+        if (!startTime) {
+            throw new HttpError(400, "Invalid start time provided");
+        }
 
         // Ensure aligned to 15 mins for consistency
         const alignedStart = new Date(Math.ceil(startTime.getTime() / (15 * 60 * 1000)) * (15 * 60 * 1000));

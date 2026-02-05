@@ -6,7 +6,7 @@ import { redlock } from "../config/redis";
 import { stripe } from "../config/stripe";
 import { env } from "../config/env";
 import { asyncHandler } from "../utils/asyncHandler";
-import { alignToSlotInterval, calculateDurationMinutes, isWithinBusinessHours, getClosingTime } from "../utils/time";
+import { alignToSlotInterval, calculateDurationMinutes, isWithinBusinessHours, getClosingTime, parseSafeDate } from "../utils/time";
 import { generateShortId } from "../utils/shortId";
 import { HttpError } from "../middleware/errorHandler";
 import { checkAvailability, acquireTableLocks } from "../services/availability";
@@ -40,19 +40,19 @@ export const reservationSchema = z.object({
 
 const reservationsLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  limit: 1000000, // Unlimited for testing
+  max: 10, // 10 reservations per hour per IP
   message: { error: "Too many reservations created from this IP, please try again after an hour" },
 });
 
 const cancellationLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  limit: 1000000, // Unlimited for testing
+  max: 20, // 20 cancellations per hour
   message: { error: "Too many cancellation attempts, please try again later" },
 });
 
 const publicLookupLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  limit: 1000000, // Unlimited for testing
+  max: 50, // 50 lookups per hour
   message: { error: "Too many lookup attempts" },
 });
 
@@ -61,10 +61,10 @@ router.post(
   reservationsLimiter,
   asyncHandler(async (req, res) => {
     const payload = reservationSchema.parse(req.body);
-    const startTime = new Date(payload.startTime);
+    const startTime = parseSafeDate(payload.startTime);
 
-    if (Number.isNaN(startTime.getTime())) {
-      throw new HttpError(400, "Invalid startTime");
+    if (!startTime) {
+      throw new HttpError(400, "Invalid startTime provided");
     }
 
     if (startTime <= new Date()) {
@@ -388,10 +388,10 @@ router.get(
       throw new HttpError(400, "Missing startTime or partySize");
     }
 
-    const startTime = new Date(String(startTimeStr));
+    const startTime = parseSafeDate(startTimeStr);
     const partySize = Number(partySizeStr);
 
-    if (Number.isNaN(startTime.getTime()) || Number.isNaN(partySize)) {
+    if (!startTime || Number.isNaN(partySize)) {
       throw new HttpError(400, "Invalid parameters");
     }
 
@@ -421,10 +421,10 @@ router.get(
       throw new HttpError(400, "Missing date or partySize");
     }
 
-    const dayStart = new Date(String(dateStr));
+    const dayStart = parseSafeDate(dateStr);
     const partySize = Number(partySizeStr);
 
-    if (Number.isNaN(dayStart.getTime()) || Number.isNaN(partySize)) {
+    if (!dayStart || Number.isNaN(partySize)) {
       throw new HttpError(400, "Invalid parameters");
     }
 

@@ -183,7 +183,11 @@ export default function ReservationsList() {
 
                     <div className="flex bg-slate-100 p-1 rounded-xl">
                         <button
-                            onClick={() => { setViewMode('day'); setFilterDate(getRestaurantNow().format("YYYY-MM-DD")); }}
+                            onClick={() => {
+                                setViewMode('day');
+                                setFilterDate(getRestaurantNow().format("YYYY-MM-DD"));
+                                setFilterStatus(''); // Reset status for Today
+                            }}
                             className={clsx(
                                 "px-3 py-1 text-xs font-bold rounded-lg transition-colors border",
                                 viewMode === 'day' && filterDate === getRestaurantNow().format("YYYY-MM-DD")
@@ -194,7 +198,11 @@ export default function ReservationsList() {
                             Today
                         </button>
                         <button
-                            onClick={() => { setViewMode('day'); setFilterDate(getRestaurantNow().add(1, 'day').format("YYYY-MM-DD")); }}
+                            onClick={() => {
+                                setViewMode('day');
+                                setFilterDate(getRestaurantNow().add(1, 'day').format("YYYY-MM-DD"));
+                                setFilterStatus(''); // Reset status for Tomorrow
+                            }}
                             className={clsx(
                                 "px-3 py-1 text-xs font-bold rounded-lg transition-colors border",
                                 viewMode === 'day' && filterDate === getRestaurantNow().add(1, 'day').format("YYYY-MM-DD")

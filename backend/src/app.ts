@@ -15,6 +15,10 @@ import courseRoutes from './routes/course.routes';
 import messageRoutes from './routes/message.routes';
 
 const app: Application = express();
+
+// Trust proxy for rate limiting behind proxies (Vercel, Nginx, etc.)
+app.set('trust proxy', 1);
+
 const httpServer = createServer(app);
 
 // Socket.IO setup

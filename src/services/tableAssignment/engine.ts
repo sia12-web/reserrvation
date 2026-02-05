@@ -2,7 +2,7 @@ import { ADJACENCY_GRAPH, TABLES } from "./layout";
 import { AssignmentOptions, CandidateSet, TableConfig, TableType } from "./types";
 
 const DEFAULT_OPTIONS: AssignmentOptions = {
-  maxTablesInCombination: 8,
+  maxTablesInCombination: 3,
   tables: TABLES,
   adjacency: ADJACENCY_GRAPH,
 };

@@ -10,7 +10,7 @@ const router = Router();
 
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 1000000, // Unlimited for testing
+    limit: 10, // 10 attempts per 15 mins
     message: { error: "Too many login attempts, please try again after 15 minutes" },
 });
 

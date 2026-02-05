@@ -93,6 +93,7 @@ export function generateTimeSlots(
 }
 
 export function toUtcIso(time: Dayjs): string {
+  if (!time || !time.isValid()) return "";
   return time.utc().toISOString();
 }
 
