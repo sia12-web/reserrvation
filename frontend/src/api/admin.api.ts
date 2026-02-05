@@ -93,5 +93,5 @@ export async function createReservation(payload: {
 }
 
 export async function resetReservations() {
-    return httpPost<{ message: string }>("/admin/debug/reset-reservations", {});
+    return httpPost<{ message: string }>("/admin/debug/reset-reservations", { confirmCode: "CONFIRM_RESET" });
 }

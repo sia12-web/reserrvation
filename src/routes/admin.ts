@@ -97,9 +97,12 @@ router.get("/debug/force-seed", asyncHandler(async (_req, res) => {
 }));
 
 // RESET RESERVATIONS ENDPOINT
-router.post("/debug/reset-reservations", asyncHandler(async (_req, res) => {
-    if (process.env.NODE_ENV === "production") {
-        res.status(403).json({ error: "Reset endpoint is disabled in production" });
+router.post("/debug/reset-reservations", asyncHandler(async (req, res) => {
+    const { confirmCode } = req.body || {};
+
+    // Require confirmation code for safety (works in all environments)
+    if (confirmCode !== "CONFIRM_RESET") {
+        res.status(400).json({ error: "Invalid confirmation code. Send { confirmCode: 'CONFIRM_RESET' } to proceed." });
         return;
     }
 
