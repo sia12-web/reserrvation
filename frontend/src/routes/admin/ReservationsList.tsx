@@ -89,8 +89,8 @@ export default function ReservationsList() {
         queryFn: () => {
             let statusParam = filterStatus;
 
-            // If in upcoming mode and no specific status filter is selected, show both active statuses
-            if (viewMode === 'upcoming' && !statusParam) {
+            // Handle the composite active status
+            if (statusParam === "__ACTIVE__") {
                 statusParam = "CONFIRMED,PENDING_DEPOSIT";
             }
 
@@ -206,15 +206,28 @@ export default function ReservationsList() {
                         </button>
 
                         <button
-                            onClick={() => { setViewMode('upcoming'); setFilterStatus(''); }}
+                            onClick={() => { setViewMode('upcoming'); setFilterStatus('__ACTIVE__'); }}
                             className={clsx(
-                                "px-3 py-1 text-xs font-bold rounded-lg transition-colors border",
-                                viewMode === 'upcoming'
+                                "px-3 py-1 text-xs font-bold rounded-lg transition-colors border whitespace-nowrap",
+                                viewMode === 'upcoming' && filterStatus === '__ACTIVE__'
                                     ? "text-purple-600 bg-purple-50 border-purple-200"
                                     : "text-slate-500 bg-white border-slate-200 hover:bg-slate-50"
                             )}
+                            title="Active Future Bookings"
                         >
                             Upcoming
+                        </button>
+                        <button
+                            onClick={() => { setViewMode('upcoming'); setFilterStatus(''); }}
+                            className={clsx(
+                                "px-3 py-1 text-xs font-bold rounded-lg transition-colors border whitespace-nowrap",
+                                viewMode === 'upcoming' && filterStatus === ''
+                                    ? "text-indigo-600 bg-indigo-50 border-indigo-200"
+                                    : "text-slate-500 bg-white border-slate-200 hover:bg-slate-50"
+                            )}
+                            title="All Future Statuses"
+                        >
+                            All Upcoming
                         </button>
                     </div>
                     <button
@@ -236,6 +249,7 @@ export default function ReservationsList() {
                         onChange={(e) => setFilterStatus(e.target.value)}
                     >
                         <option value="">All Statuses</option>
+                        <option value="__ACTIVE__">Active (Confirmed/Pending)</option>
                         <option value="CONFIRMED">Confirmed</option>
                         <option value="PENDING_DEPOSIT">Pending Deposit</option>
                         <option value="CHECKED_IN">Checked In</option>
