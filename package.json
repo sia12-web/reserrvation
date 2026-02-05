@@ -7,6 +7,7 @@
     "build": "tsc -p tsconfig.build.json",
     "build:frontend": "cd frontend && npm install --include=dev && npm run build",
     "build:deploy": "npm install && npm run build && npm run build:frontend",
+    "start": "npx prisma migrate deploy && node dist/index.js",
     "prisma:generate": "prisma generate",
     "test": "jest",
     "ci": "npm run prisma:generate && npm run build && npm run test && npm run build:frontend"
