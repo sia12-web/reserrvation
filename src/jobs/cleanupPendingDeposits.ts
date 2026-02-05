@@ -45,6 +45,9 @@ export function startCleanupWorker(): Worker {
         }
 
         await prisma.$transaction([
+          prisma.reservationTable.deleteMany({
+            where: { reservationId: reservation.id },
+          }),
           prisma.payment.updateMany({
             where: { reservationId: reservation.id },
             data: { status: "FAILED" },

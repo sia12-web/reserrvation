@@ -12,6 +12,7 @@ import { TableConfig } from "../services/tableAssignment/types";
 import { generateShortId } from "../utils/shortId";
 import { redlock } from "../config/redis";
 import rateLimit from "express-rate-limit";
+import { maskPII } from "../utils/masking";
 
 const router = Router();
 
@@ -34,6 +35,11 @@ router.get("/ping", (_req, res) => {
 // FORCE SEED ENDPOINT (Emergency fix for empty database)
 router.get("/debug/force-seed", asyncHandler(async (_req, res) => {
     // 1. Check if tables exist
+    if (process.env.NODE_ENV === "production") {
+        res.status(403).json({ error: "Seed endpoint is disabled in production" });
+        return;
+    }
+
     const count = await prisma.table.count();
     if (count > 0) {
         res.json({ message: "Database already has tables. Skipping seed to prevent data loss. Use /debug/reset-seed to force wipe." });
@@ -92,6 +98,11 @@ router.get("/debug/force-seed", asyncHandler(async (_req, res) => {
 
 // RESET RESERVATIONS ENDPOINT
 router.post("/debug/reset-reservations", asyncHandler(async (_req, res) => {
+    if (process.env.NODE_ENV === "production") {
+        res.status(403).json({ error: "Reset endpoint is disabled in production" });
+        return;
+    }
+
     // 1. Delete ReservationTables
     await prisma.reservationTable.deleteMany({});
     // 2. Delete Payments
@@ -343,6 +354,7 @@ router.post(
                     reservationId: reservationId,
                     action: "LATE_WARNING_SENT",
                     reason: "Admin prompted via system",
+                    before: maskPII(reservation),
                 },
             });
         });
@@ -395,7 +407,7 @@ router.post(
             throw new HttpError(500, "Active layout not configured");
         }
 
-        const lock = await redlock.acquire([`lock:availability:${startTime.getTime()}`], 5000);
+        const lock = await redlock.acquire([`lock:availability:${startTime.toISOString()}`], 5000);
         try {
             const unavailable = await checkAvailability(prisma, { startTime, endTime });
             const tableConfigs: TableConfig[] = activeLayout.tables.map((table) => ({
@@ -459,13 +471,13 @@ router.post(
                     data: {
                         reservationId: created.id,
                         action: "WALK_IN_CREATED",
-                        after: { tableIds },
+                        after: maskPII({ tableIds, reservation: created }),
                         reason: "Admin created walk-in",
                     },
                 });
 
                 return created;
-            });
+            }, { isolationLevel: "Serializable" });
 
             res.status(201).json({
                 ...reservation,
@@ -510,7 +522,7 @@ router.post(
             throw new HttpError(500, "Active layout not configured");
         }
 
-        const lock = await redlock.acquire([`lock:availability:${alignedStart.getTime()}`], 5000);
+        const lock = await redlock.acquire([`lock:availability:${alignedStart.toISOString()}`], 5000);
         try {
             const unavailable = await checkAvailability(prisma, { startTime: alignedStart, endTime });
             const tableConfigs: TableConfig[] = activeLayout.tables.map((table) => ({
@@ -564,13 +576,13 @@ router.post(
                     data: {
                         reservationId: created.id,
                         action: "RESERVATION_CREATED_MANUAL",
-                        after: { tableIds },
+                        after: maskPII({ tableIds, reservation: created }),
                         reason: "Admin manual creation",
                     },
                 });
 
                 return created;
-            });
+            }, { isolationLevel: "Serializable" });
 
             res.status(201).json({
                 ...reservation,
@@ -615,7 +627,7 @@ router.post(
             throw new HttpError(500, "Active layout not configured");
         }
 
-        const lock = await redlock.acquire([`lock:availability:${reservation.startTime.getTime()}`], 5000);
+        const lock = await redlock.acquire([`lock:availability:${reservation.startTime.toISOString()}`], 5000);
         try {
             // 1. Check availability on new tables (excluding this reservation's current engagement)
             const unavailable = await checkAvailability(prisma, {
@@ -678,8 +690,8 @@ router.post(
                     data: {
                         reservationId: id as string,
                         action: "TABLES_REASSIGNED",
-                        before: { tableIds: beforeTableIds },
-                        after: { tableIds: newTableIds },
+                        before: maskPII({ tableIds: beforeTableIds, reservation }),
+                        after: maskPII({ tableIds: newTableIds }),
                         reason,
                     },
                 });
@@ -742,7 +754,7 @@ router.post(
                     reservationId: reservation.id,
                     tableId,
                     action: "TABLE_FREED",
-                    before: { status: reservation.status, endTime: reservation.endTime },
+                    before: maskPII({ status: reservation.status, endTime: reservation.endTime, reservation }),
                     after: { status: "COMPLETED", endTime: now },
                     reason,
                 },
@@ -781,15 +793,18 @@ router.post(
                 where: { id: reservationId },
                 data: {
                     status: "CANCELLED",
-                    // We don't change times, just status
                 } as any,
+            });
+
+            await tx.reservationTable.deleteMany({
+                where: { reservationId: reservationId },
             });
 
             await (tx as any).auditLog.create({
                 data: {
                     reservationId: reservationId,
                     action: "RESERVATION_CANCELLED",
-                    before: { status: reservation.status },
+                    before: maskPII(reservation),
                     after: { status: "CANCELLED" },
                     reason,
                 },

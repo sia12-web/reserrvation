@@ -59,6 +59,7 @@ describe("POST /webhooks/stripe", () => {
     prismaMock.reservation.findFirst.mockResolvedValue({
       id: "res-1",
       shortId: "SHORT123",
+      status: "PENDING_DEPOSIT",
       clientName: "Alex Doe",
       partySize: 2,
       startTime: new Date(),
@@ -103,5 +104,34 @@ describe("POST /webhooks/stripe", () => {
       where: { providerIntentId: "pi_fail" },
       data: { status: "FAILED" },
     });
+  });
+
+  test("skips confirmation if reservation is already CANCELLED", async () => {
+    const body = Buffer.from(JSON.stringify({ type: "payment_intent.succeeded" }));
+    constructEventMock.mockReturnValue({
+      type: "payment_intent.succeeded",
+      data: {
+        object: {
+          id: "pi_stale",
+          metadata: { shortId: "SHORT_STALE" },
+        },
+      },
+    });
+
+    prismaMock.payment.findFirst.mockResolvedValue({ reservationId: "res-stale" });
+    prismaMock.reservation.findFirst.mockResolvedValue({
+      id: "res-stale",
+      status: "CANCELLED", // Already cancelled
+      reservationTables: [{ tableId: "T1" }],
+    });
+
+    const response = await request(app)
+      .post("/webhooks/stripe")
+      .set("stripe-signature", "testsig")
+      .send(body);
+
+    expect(response.status).toBe(200);
+    // Should NOT update to CONFIRMED
+    expect(prismaMock.reservation.update).not.toHaveBeenCalled();
   });
 });

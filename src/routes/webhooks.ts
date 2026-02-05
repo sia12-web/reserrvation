@@ -36,36 +36,46 @@ router.post("/stripe", async (req, res) => {
       const reservationId = payment?.reservationId;
 
       if (reservationId || shortId) {
-        const reservation = await prisma.reservation.findFirst({
-          where: reservationId ? { id: reservationId } : { shortId },
-          include: { reservationTables: { select: { tableId: true } } },
-        });
+        await prisma.$transaction(async (tx) => {
+          const reservation = await tx.reservation.findFirst({
+            where: reservationId ? { id: reservationId } : { shortId },
+            include: { reservationTables: { select: { tableId: true } } },
+          });
 
-        if (reservation) {
-          const tableIds = reservation.reservationTables.map(rt => rt.tableId);
-          await prisma.$transaction([
-            prisma.payment.updateMany({
+          if (reservation) {
+            // CRITICAL: Only confirm if it's actually waiting for a deposit.
+            // If an admin already handled it (CANCELLED, CONFIRMED already, etc.), don't overwrite.
+            if (reservation.status !== "PENDING_DEPOSIT") {
+              console.warn(`[Webhook] Skipping confirmation for reservation ${reservation.id} because status is ${reservation.status}`);
+              return;
+            }
+
+            const tableIds = reservation.reservationTables.map(rt => rt.tableId);
+
+            await tx.payment.updateMany({
               where: { providerIntentId: intent.id },
               data: { status: "SUCCEEDED" },
-            }),
-            prisma.reservation.update({
+            });
+
+            await tx.reservation.update({
               where: { id: reservation.id },
               data: { status: "CONFIRMED", depositStatus: "PAID" },
-            }),
-          ]);
+            });
 
-          if (reservation.clientEmail) {
-            const { sendReservationConfirmation } = await import("../services/email");
-            sendReservationConfirmation({
-              to: reservation.clientEmail,
-              clientName: reservation.clientName,
-              partySize: reservation.partySize,
-              startTime: reservation.startTime,
-              shortId: reservation.shortId,
-              tableIds,
-            }).catch(err => console.error("Webhook Email error:", err));
+            if (reservation.clientEmail) {
+              const { sendReservationConfirmation } = await import("../services/email");
+              // Note: Email sending is side-effect, but we do it after DB updates succeed in transaction
+              sendReservationConfirmation({
+                to: reservation.clientEmail,
+                clientName: reservation.clientName,
+                partySize: reservation.partySize,
+                startTime: reservation.startTime,
+                shortId: reservation.shortId,
+                tableIds,
+              }).catch(err => console.error("Webhook Email error:", err));
+            }
           }
-        }
+        });
       }
       break;
     }

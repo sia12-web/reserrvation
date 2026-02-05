@@ -15,6 +15,7 @@ import { TableConfig } from "../services/tableAssignment/types";
 import { sendReservationConfirmation, sendDepositRequestEmail } from "../services/email";
 import { trySmartReassignment } from "../services/reassignment";
 import rateLimit from "express-rate-limit";
+import { maskPII } from "../utils/masking";
 
 const router = Router();
 
@@ -255,7 +256,7 @@ router.post(
                   reservationId: move.reservationId,
                   action: "SYSTEM_REASSIGNMENT",
                   reason: `Moved to accommodate new party of ${payload.partySize}`,
-                  after: { tableIds: move.newTableIds }
+                  after: maskPII({ tableIds: move.newTableIds })
                 }
               });
             }
@@ -582,6 +583,8 @@ router.post(
         data: {
           reservationId: id,
           action: "RESERVATION_CANCELLED_BY_USER",
+          before: maskPII(reservation),
+          after: { status: "CANCELLED" },
           reason: reason || "User cancelled via management link",
         },
       });
