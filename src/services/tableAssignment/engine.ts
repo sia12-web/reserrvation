@@ -29,7 +29,7 @@ export function findBestTableAssignment(
   ];
 
   const sorted = candidates.sort(
-    (a, b) => a.score - b.score || a.tableIds[0].localeCompare(b.tableIds[0])
+    (a, b) => a.score - b.score || a.tableIds[0].localeCompare(b.tableIds[0], undefined, { numeric: true })
   );
   return { candidates: sorted, best: sorted[0] };
 }
@@ -129,8 +129,8 @@ function scoreCandidate(tables: TableConfig[], partySize: number): number {
   const totalCapacity = getGeometricCapacity(tables);
   const waste = totalCapacity - partySize;
 
-  // Heavily penalize multiple tables to favor single-table solutions (was 2, now 20)
-  const tableCountPenalty = (tables.length - 1) * 10; // Reduced from 20 to 10 to allow reasonable combinations
+  // Heavily penalize multiple tables to favor single-table solutions
+  const tableCountPenalty = (tables.length - 1) * 30; // Increased to 30 to strongly favor single tables
 
   const mismatchPenalty = tables.reduce((sum, table) => {
     // Penalize using a large Merged Fixed table for very small groups if not needed
@@ -224,22 +224,32 @@ export function getGeometricCapacity(tables: TableConfig[]): number {
   if (tables.length === 0) return 0;
   if (tables.length === 1) return tables[0].maxCapacity;
 
-  // Horizontal/Vertical Layout agnostic geometric capacity
-  // Based on user feedback: 3 tables (T1+T2+T3) should accommodate ~15 people.
-  // Our formula below: 10 (base 2 units) + 5 (3rd unit) = 15.
-  // This matches perfectly. We remove the explicit "Sum if Vertical" check because
-  // simple summing (4+4+4=12) undercounts the capacity of T1+T2+T3 (15).
+  // Horizontal/Vertical Layout check:
+  // If tables are vertically stacked (Y diff > 50), capacity is simply the sum.
+  // This prevents over-imagining joined capacities in aisles.
+  const yValues = tables.map(t => t.y).filter(y => y !== undefined) as number[];
+  const minY = Math.min(...yValues);
+  const maxY = Math.max(...yValues);
+  const isVertical = yValues.length > 1 && (maxY - minY) > 50;
+
+  if (isVertical) {
+    return tables.reduce((sum, t) => sum + t.maxCapacity, 0);
+  }
 
   const totalUnits = tables.reduce((sum, t) => sum + getTableUnits(t), 0);
 
   if (totalUnits <= 1) return tables[0].maxCapacity;
 
-  // Formula: 2->10, 3->15, 4->19, 5->24, 6->28...
-  // Base 2 units = 10.
+  // Formula alternates +5, +4, +5, +4...
+  // 2 units -> 10
+  // 3 units -> 15 (+5)
+  // 4 units -> 19 (+4)
+  // 5 units -> 24 (+5)
+  // 6 units -> 28 (+4)
   let capacity = 10;
   for (let u = 3; u <= totalUnits; u++) {
-    // Simplified: Always +5 per unit
-    capacity += 5;
+    const increment = u % 2 === 1 ? 5 : 4;
+    capacity += increment;
   }
   return capacity;
 }

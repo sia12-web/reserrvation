@@ -46,6 +46,7 @@ export async function trySmartReassignment(
 
     // Group by reservation
     for (const c of conflicts) {
+        if (!c.reservationId || !c.reservation) continue;
         if (!reservationMap.has(c.reservationId)) {
             reservationMap.set(c.reservationId, { reservation: c.reservation, tableIds: [] });
         }

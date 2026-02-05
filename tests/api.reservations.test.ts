@@ -32,6 +32,12 @@ jest.mock("../src/config/stripe", () => ({
   },
 }));
 
+jest.mock("../src/utils/time", () => ({
+  ...jest.requireActual("../src/utils/time"),
+  isWithinBusinessHours: () => true,
+  alignToSlotInterval: () => true,
+}));
+
 const app = require("../src/app").default;
 
 describe("POST /reservations", () => {
@@ -61,7 +67,6 @@ describe("POST /reservations", () => {
     });
     prismaMock.reservationTable.createMany.mockResolvedValue({ count: 1 });
     prismaMock.$transaction.mockImplementation(async (cb: any) => cb(prismaMock));
-    redlockMock.acquire.mockResolvedValue({ release: jest.fn() });
 
     const response = await request(app)
       .post("/api/reservations")
@@ -83,7 +88,14 @@ describe("POST /reservations", () => {
       isActive: true,
       tables: [{ id: "T1" }],
     });
-    prismaMock.reservationTable.findMany.mockResolvedValue([{ tableId: "T1" }]);
+    // Mock enough data for checkAvailability and trySmartReassignment
+    prismaMock.reservationTable.findMany.mockResolvedValue([
+      {
+        tableId: "T1",
+        reservationId: "existing-res",
+        reservation: { id: "existing-res", partySize: 2, status: "CONFIRMED" }
+      }
+    ]);
 
     const response = await request(app)
       .post("/api/reservations")
@@ -99,18 +111,15 @@ describe("POST /reservations", () => {
 });
 
 function buildAlignedStartTime(): Date {
-  const now = new Date();
-  const minutes = now.getUTCMinutes();
-  const rounded = minutes + (15 - (minutes % 15 || 15));
-  const aligned = new Date(Date.UTC(
-    now.getUTCFullYear(),
-    now.getUTCMonth(),
-    now.getUTCDate(),
-    now.getUTCHours(),
-    rounded,
+  const tomorrow = new Date();
+  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+  return new Date(Date.UTC(
+    tomorrow.getUTCFullYear(),
+    tomorrow.getUTCMonth(),
+    tomorrow.getUTCDate(),
+    18, // 18:00 UTC = 13:00 Montreal (Safe business hour)
+    0,
     0,
     0
   ));
-  aligned.setUTCHours(aligned.getUTCHours() + 1);
-  return aligned;
 }
