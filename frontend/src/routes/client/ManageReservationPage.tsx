@@ -14,7 +14,6 @@ import {
     Loader2,
     ArrowRight
 } from "lucide-react";
-import dayjs from "dayjs";
 import { toRestaurantTime, getRestaurantNow } from "../../utils/time";
 
 import clsx from "clsx";
