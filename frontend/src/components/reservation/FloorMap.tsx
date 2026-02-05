@@ -17,6 +17,7 @@ export default function FloorMap({
     unavailableTableIds = [],
     selectedTableIds = [],
     onSelectTable,
+    readOnly = false,
     isAdminView = false,
     partySize,
 }: FloorMapProps) {
