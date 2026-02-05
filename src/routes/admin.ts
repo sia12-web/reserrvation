@@ -842,4 +842,60 @@ router.post(
     })
 );
 
+/**
+ * POST /admin/tables/:tableId/free
+ * Free a table by completing its current CHECKED_IN reservation
+ */
+const freeTableSchema = z.object({
+    reason: z.string().optional(),
+});
+
+router.post(
+    "/tables/:tableId/free",
+    asyncHandler(async (req, res) => {
+        const tableId = String(req.params.tableId);
+        const { reason } = freeTableSchema.parse(req.body);
+        const now = new Date();
+
+        // Find the current active reservation for this table
+        const reservationTable = await prisma.reservationTable.findFirst({
+            where: {
+                tableId,
+                reservation: {
+                    status: { in: ["CHECKED_IN", "CONFIRMED", "PENDING_DEPOSIT"] },
+                    startTime: { lte: now },
+                    endTime: { gte: now },
+                },
+            },
+            include: { reservation: true },
+        });
+
+        if (!reservationTable) {
+            throw new HttpError(404, "No active reservation found for this table");
+        }
+
+        const reservation = reservationTable.reservation;
+
+        // Mark the reservation as COMPLETED
+        await prisma.$transaction(async (tx) => {
+            await tx.reservation.update({
+                where: { id: reservation.id },
+                data: { status: "COMPLETED" } as any,
+            });
+
+            await (tx as any).auditLog.create({
+                data: {
+                    reservationId: reservation.id,
+                    action: "TABLE_FREED",
+                    before: maskPII({ status: reservation.status }),
+                    after: { status: "COMPLETED" },
+                    reason: reason || "Admin freed table",
+                },
+            });
+        });
+
+        res.json({ message: `Table ${tableId} is now free` });
+    })
+);
+
 export default router;
