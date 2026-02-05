@@ -75,8 +75,9 @@ export function parseSafeDate(dateStr: any): Date | null {
 }
 
 export function getStartAndEndOfDay(date: string): { start: Date; end: Date } {
-  const parsed = parseSafeDate(date);
-  let d = parsed ? dayjs(parsed).tz(RESTAURANT_TZ) : dayjs().tz(RESTAURANT_TZ);
+  // Parse directly in the timezone to keep "2026-02-05" as Feb 5th Montreal time
+  // instead of Feb 5th UTC converted to Montreal (which becomes Feb 4th)
+  let d = date ? dayjs.tz(date, RESTAURANT_TZ) : dayjs().tz(RESTAURANT_TZ);
 
   return {
     start: d.startOf("day").toDate(),
