@@ -22,7 +22,18 @@ export default function FloorMap({
 }: FloorMapProps) {
     const PADDING = 40;
 
-    // ... (bounds calculation)
+    // Calculate bounds dynamically from tables to ensure they are all visible
+    const bounds = layout.tables.reduce(
+        (acc, t) => {
+            return {
+                minX: Math.min(acc.minX, t.x),
+                minY: Math.min(acc.minY, t.y),
+                maxX: Math.max(acc.maxX, t.x + t.width),
+                maxY: Math.max(acc.maxY, t.y + t.height),
+            };
+        },
+        { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity }
+    );
 
     // Determine effective view mode
     const effectiveIsAdminView = isAdminView || layout.name === "Floor View";
