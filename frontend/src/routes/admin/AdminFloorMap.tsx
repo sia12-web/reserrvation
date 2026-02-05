@@ -6,8 +6,7 @@ import FloorMap from "../../components/reservation/FloorMap";
 import {
     UserPlus, Power, Info, AlertCircle, CheckCircle2,
     Loader2, ChevronLeft, ChevronRight, CalendarDays,
-    Search as SearchIcon, ListFilter, Phone, Users,
-    Printer, Trash2, TriangleAlert
+    Search as SearchIcon, ListFilter
 } from "lucide-react";
 import dayjs from "dayjs";
 import { toRestaurantTime, getRestaurantNow } from "../../utils/time";
@@ -19,6 +18,7 @@ export default function AdminFloorMap() {
     const [selectedDate, setSelectedDate] = useState(() => toRestaurantTime(new Date().toISOString()).format("YYYY-MM-DD"));
     const [viewMode, setViewMode] = useState<'map' | 'upcoming' | 'all-upcoming'>('map');
     const [searchTerm, setSearchTerm] = useState("");
+    const [filterStatus, setFilterStatus] = useState<string>("__ACTIVE__");
 
     const [isWalkinModalOpen, setIsWalkinModalOpen] = useState(false);
     const [isFreeModalOpen, setIsFreeModalOpen] = useState(false);
@@ -33,9 +33,12 @@ export default function AdminFloorMap() {
     });
 
     const { data: upcomingReservations, isLoading: isUpcomingLoading } = useQuery({
-        queryKey: ["admin_upcoming_reservations", viewMode],
+        queryKey: ["admin_upcoming_reservations", viewMode, filterStatus],
         queryFn: () => {
-            const status = viewMode === 'upcoming' ? "CONFIRMED,PENDING_DEPOSIT" : "";
+            let status = filterStatus;
+            if (status === "__ACTIVE__") {
+                status = "CONFIRMED,PENDING_DEPOSIT";
+            }
             return fetchAdminReservations({
                 status,
                 from: new Date().toISOString(),
@@ -128,17 +131,32 @@ export default function AdminFloorMap() {
                             </div>
                         </div>
 
-                        {/* Search Bar in List Mode */}
+                        {/* Search & Filter in List Mode */}
                         {viewMode !== 'map' && (
-                            <div className="relative w-full">
-                                <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-                                <input
-                                    type="text"
-                                    placeholder="Search upcoming..."
-                                    className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                />
+                            <div className="flex flex-col md:flex-row gap-4 w-full">
+                                <div className="relative flex-grow">
+                                    <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search upcoming..."
+                                        className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                </div>
+                                <select
+                                    className="px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500 transition-all font-semibold text-slate-700 appearance-none bg-white cursor-pointer min-w-[180px]"
+                                    value={filterStatus}
+                                    onChange={(e) => setFilterStatus(e.target.value)}
+                                >
+                                    <option value="">All Statuses</option>
+                                    <option value="__ACTIVE__">Active (Confirmed/Pending)</option>
+                                    <option value="CONFIRMED">Confirmed</option>
+                                    <option value="PENDING_DEPOSIT">Pending Deposit</option>
+                                    <option value="CHECKED_IN">Checked In</option>
+                                    <option value="COMPLETED">Completed</option>
+                                    <option value="CANCELLED">Cancelled</option>
+                                </select>
                             </div>
                         )}
 
@@ -157,10 +175,10 @@ export default function AdminFloorMap() {
                                     Map View
                                 </button>
                                 <button
-                                    onClick={() => setViewMode('upcoming')}
+                                    onClick={() => { setViewMode('upcoming'); setFilterStatus('__ACTIVE__'); }}
                                     className={clsx(
                                         "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all whitespace-nowrap",
-                                        viewMode === 'upcoming'
+                                        viewMode === 'upcoming' && filterStatus === '__ACTIVE__'
                                             ? "bg-white text-purple-600 border-slate-200 shadow-sm"
                                             : "text-slate-500 border-transparent hover:text-slate-700"
                                     )}
@@ -168,10 +186,10 @@ export default function AdminFloorMap() {
                                     Upcoming
                                 </button>
                                 <button
-                                    onClick={() => setViewMode('all-upcoming')}
+                                    onClick={() => { setViewMode('all-upcoming'); setFilterStatus(''); }}
                                     className={clsx(
                                         "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all whitespace-nowrap",
-                                        viewMode === 'all-upcoming'
+                                        viewMode === 'all-upcoming' || (viewMode === 'upcoming' && filterStatus === '')
                                             ? "bg-white text-indigo-600 border-slate-200 shadow-sm"
                                             : "text-slate-500 border-transparent hover:text-slate-700"
                                     )}
