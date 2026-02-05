@@ -225,18 +225,6 @@ export default function ReservationsList() {
                         >
                             Upcoming
                         </button>
-                        <button
-                            onClick={() => { setViewMode('upcoming'); setFilterStatus(''); }}
-                            className={clsx(
-                                "px-3 py-1 text-xs font-bold rounded-lg transition-colors border whitespace-nowrap",
-                                viewMode === 'upcoming' && filterStatus === ''
-                                    ? "text-indigo-600 bg-indigo-50 border-indigo-200"
-                                    : "text-slate-500 bg-white border-slate-200 hover:bg-slate-50"
-                            )}
-                            title="All Future Statuses"
-                        >
-                            All Upcoming
-                        </button>
                     </div>
                     <button
                         onClick={() => window.print()}

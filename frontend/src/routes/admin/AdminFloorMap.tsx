@@ -1,12 +1,10 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchFloorState, freeTable, createWalkin, fetchAdminReservations } from "../../api/admin.api";
-import type { ReservationAdmin } from "../../api/admin.api";
+import { fetchFloorState, freeTable, createWalkin } from "../../api/admin.api";
 import FloorMap from "../../components/reservation/FloorMap";
 import {
     UserPlus, Power, Info, AlertCircle, CheckCircle2,
-    Loader2, ChevronLeft, ChevronRight, CalendarDays,
-    Search as SearchIcon, ListFilter
+    Loader2, ChevronLeft, ChevronRight, CalendarDays
 } from "lucide-react";
 import dayjs from "dayjs";
 import { toRestaurantTime, getRestaurantNow } from "../../utils/time";
@@ -16,9 +14,6 @@ export default function AdminFloorMap() {
     const queryClient = useQueryClient();
     const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
     const [selectedDate, setSelectedDate] = useState(() => toRestaurantTime(new Date().toISOString()).format("YYYY-MM-DD"));
-    const [viewMode, setViewMode] = useState<'map' | 'upcoming' | 'all-upcoming'>('map');
-    const [searchTerm, setSearchTerm] = useState("");
-    const [filterStatus, setFilterStatus] = useState<string>("__ACTIVE__");
 
     const [isWalkinModalOpen, setIsWalkinModalOpen] = useState(false);
     const [isFreeModalOpen, setIsFreeModalOpen] = useState(false);
@@ -29,25 +24,9 @@ export default function AdminFloorMap() {
         queryKey: ["admin_floor_state", selectedDate],
         queryFn: () => fetchFloorState(selectedDate),
         refetchInterval: 5000,
-        enabled: viewMode === 'map' && !!selectedDate && dayjs(selectedDate).isValid()
+        enabled: !!selectedDate && dayjs(selectedDate).isValid()
     });
 
-    const { data: upcomingReservations, isLoading: isUpcomingLoading } = useQuery({
-        queryKey: ["admin_upcoming_reservations", viewMode, filterStatus],
-        queryFn: () => {
-            let status = filterStatus;
-            if (status === "__ACTIVE__") {
-                status = "CONFIRMED,PENDING_DEPOSIT";
-            }
-            return fetchAdminReservations({
-                status,
-                from: new Date().toISOString(),
-                limit: 100
-            });
-        },
-        enabled: viewMode !== 'map',
-        refetchInterval: 15000,
-    });
 
     const isToday = selectedDate === toRestaurantTime(new Date().toISOString()).format("YYYY-MM-DD");
     const now = getRestaurantNow();
@@ -111,7 +90,7 @@ export default function AdminFloorMap() {
                                 <input
                                     type="date"
                                     value={selectedDate}
-                                    onChange={(e) => { setViewMode('map'); setSelectedDate(e.target.value); }}
+                                    onChange={(e) => setSelectedDate(e.target.value)}
                                     className="bg-transparent border-none outline-none font-black text-slate-900 px-2 cursor-pointer"
                                 />
                                 <button onClick={() => changeDate(1)} className="p-2 hover:bg-white hover:shadow rounded-lg transition-all text-slate-500">
@@ -121,93 +100,26 @@ export default function AdminFloorMap() {
                             <div className="flex items-center gap-3">
                                 <div className={clsx(
                                     "flex items-center gap-2 px-4 py-2 rounded-full border border-blue-100 transition-all text-sm font-bold",
-                                    viewMode === 'map' ? (isToday ? "bg-blue-50 text-blue-800" : "bg-purple-50 text-purple-800 border-purple-100") : "bg-indigo-50 text-indigo-800 border-indigo-100"
+                                    isToday ? "bg-blue-50 text-blue-800" : "bg-purple-50 text-purple-800 border-purple-100"
                                 )}>
-                                    {viewMode === 'map' ? (isToday ? <CheckCircle2 className="w-4 h-4" /> : <CalendarDays className="w-4 h-4" />) : <ListFilter className="w-4 h-4" />}
+                                    {isToday ? <CheckCircle2 className="w-4 h-4" /> : <CalendarDays className="w-4 h-4" />}
                                     <span>
-                                        {viewMode === 'map' ? (isToday ? "Live View" : "Historical View") : (viewMode === 'upcoming' ? "Active Upcoming" : "All Upcoming")}
+                                        {isToday ? "Live View" : "Historical View"}
                                     </span>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Search & Filter in List Mode */}
-                        {viewMode !== 'map' && (
-                            <div className="flex flex-col md:flex-row gap-4 w-full">
-                                <div className="relative flex-grow">
-                                    <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-                                    <input
-                                        type="text"
-                                        placeholder="Search upcoming..."
-                                        className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                    />
-                                </div>
-                                <select
-                                    className="px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500 transition-all font-semibold text-slate-700 appearance-none bg-white cursor-pointer min-w-[180px]"
-                                    value={filterStatus}
-                                    onChange={(e) => setFilterStatus(e.target.value)}
-                                >
-                                    <option value="">All Statuses</option>
-                                    <option value="__ACTIVE__">Active (Confirmed/Pending)</option>
-                                    <option value="CONFIRMED">Confirmed</option>
-                                    <option value="PENDING_DEPOSIT">Pending Deposit</option>
-                                    <option value="CHECKED_IN">Checked In</option>
-                                    <option value="COMPLETED">Completed</option>
-                                    <option value="CANCELLED">Cancelled</option>
-                                </select>
-                            </div>
-                        )}
-
-                        {/* Quick Dates & View Toggle */}
+                        {/* Quick Dates */}
                         <div className="flex gap-2 pb-2 overflow-x-auto items-center">
-                            <div className="flex bg-slate-100 p-1 rounded-xl mr-2">
-                                <button
-                                    onClick={() => setViewMode('map')}
-                                    className={clsx(
-                                        "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all whitespace-nowrap",
-                                        viewMode === 'map'
-                                            ? "bg-white text-blue-600 border-slate-200 shadow-sm"
-                                            : "text-slate-500 border-transparent hover:text-slate-700"
-                                    )}
-                                >
-                                    Map View
-                                </button>
-                                <button
-                                    onClick={() => { setViewMode('upcoming'); setFilterStatus('__ACTIVE__'); }}
-                                    className={clsx(
-                                        "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all whitespace-nowrap",
-                                        viewMode === 'upcoming' && filterStatus === '__ACTIVE__'
-                                            ? "bg-white text-purple-600 border-slate-200 shadow-sm"
-                                            : "text-slate-500 border-transparent hover:text-slate-700"
-                                    )}
-                                >
-                                    Upcoming
-                                </button>
-                                <button
-                                    onClick={() => { setViewMode('all-upcoming'); setFilterStatus(''); }}
-                                    className={clsx(
-                                        "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all whitespace-nowrap",
-                                        viewMode === 'all-upcoming' || (viewMode === 'upcoming' && filterStatus === '')
-                                            ? "bg-white text-indigo-600 border-slate-200 shadow-sm"
-                                            : "text-slate-500 border-transparent hover:text-slate-700"
-                                    )}
-                                >
-                                    All Upcoming
-                                </button>
-                            </div>
-
-                            <div className="h-6 w-px bg-slate-200 mx-1" />
-
-                            {viewMode === 'map' && quickDates.map((item, idx) => {
+                            {quickDates.map((item, idx) => {
                                 if (idx > 0 && (item.date.isSame(dayjs().add(1, 'day'), 'day'))) return null;
                                 const dateStr = item.date.format("YYYY-MM-DD");
                                 const isSelected = selectedDate === dateStr;
                                 return (
                                     <button
                                         key={item.label}
-                                        onClick={() => { setViewMode('map'); setSelectedDate(dateStr); }}
+                                        onClick={() => setSelectedDate(dateStr)}
                                         className={clsx(
                                             "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all whitespace-nowrap",
                                             isSelected ? "bg-slate-800 text-white border-slate-800" : "bg-white text-slate-500 border-slate-200 hover:border-slate-300 hover:text-slate-700"
@@ -220,70 +132,32 @@ export default function AdminFloorMap() {
                         </div>
                     </div>
 
-                    {viewMode === 'map' ? (
-                        isFloorLoading && !floor ? (
-                            <div className="flex-grow flex flex-col items-center justify-center gap-4">
-                                <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
-                                <p className="text-slate-500 font-medium">Loading floor plan...</p>
-                            </div>
-                        ) : floorError ? (
-                            <div className="flex-grow flex flex-col items-center justify-center gap-4 text-red-600">
-                                <AlertCircle className="w-12 h-12 opacity-50" />
-                                <p className="text-lg font-bold">Failed to load floor state</p>
-                                <p className="text-slate-500 text-sm">Please check your connection or select a valid date.</p>
-                            </div>
-                        ) : floor && (
-                            <div className="flex-grow flex items-center justify-center relative">
-                                {isFloorLoading && (
-                                    <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px] z-20 flex items-center justify-center rounded-xl">
-                                        <div className="bg-white/80 p-4 rounded-full shadow-lg border border-slate-100">
-                                            <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-                                        </div>
+                    {isFloorLoading && !floor ? (
+                        <div className="flex-grow flex flex-col items-center justify-center gap-4">
+                            <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
+                            <p className="text-slate-500 font-medium">Loading floor plan...</p>
+                        </div>
+                    ) : floorError ? (
+                        <div className="flex-grow flex flex-col items-center justify-center gap-4 text-red-600">
+                            <AlertCircle className="w-12 h-12 opacity-50" />
+                            <p className="text-lg font-bold">Failed to load floor state</p>
+                            <p className="text-slate-500 text-sm">Please check your connection or select a valid date.</p>
+                        </div>
+                    ) : floor && (
+                        <div className="flex-grow flex items-center justify-center relative">
+                            {isFloorLoading && (
+                                <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px] z-20 flex items-center justify-center rounded-xl">
+                                    <div className="bg-white/80 p-4 rounded-full shadow-lg border border-slate-100">
+                                        <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
                                     </div>
-                                )}
-                                <FloorMap
-                                    layout={{ layoutId: floor.layoutId, tables: floor.tables as any, name: "Floor View" }}
-                                    selectedTableIds={selectedTableId ? [selectedTableId] : []}
-                                    unavailableTableIds={[]}
-                                    onSelectTable={handleTableSelect}
-                                />
-                            </div>
-                        )
-                    ) : (
-                        <div className="flex-grow overflow-x-auto">
-                            {isUpcomingLoading ? (
-                                <div className="flex items-center justify-center py-20">
-                                    <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
                                 </div>
-                            ) : (
-                                <table className="w-full text-left">
-                                    <thead>
-                                        <tr className="bg-slate-50 border-b border-slate-100">
-                                            <th className="px-4 py-3 text-xs font-bold text-slate-500">ID</th>
-                                            <th className="px-4 py-3 text-xs font-bold text-slate-500">Guest</th>
-                                            <th className="px-4 py-3 text-xs font-bold text-slate-500">Time</th>
-                                            <th className="px-4 py-3 text-xs font-bold text-slate-500">Party</th>
-                                            <th className="px-4 py-3 text-xs font-bold text-slate-500">Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-100">
-                                        {(upcomingReservations || [])
-                                            .filter(r => r.clientName.toLowerCase().includes(searchTerm.toLowerCase()) || r.shortId.toLowerCase().includes(searchTerm.toLowerCase()))
-                                            .map((res: ReservationAdmin) => (
-                                                <tr key={res.id} className="hover:bg-slate-50/50 transition-colors">
-                                                    <td className="px-4 py-3 font-mono text-xs font-black text-slate-600">#{res.shortId}</td>
-                                                    <td className="px-4 py-3 font-bold text-slate-800">{res.clientName}</td>
-                                                    <td className="px-4 py-3 text-xs">
-                                                        <div className="font-semibold">{toRestaurantTime(res.startTime).format("MMM D")}</div>
-                                                        <div className="text-slate-500">{toRestaurantTime(res.startTime).format("HH:mm")}</div>
-                                                    </td>
-                                                    <td className="px-4 py-3 font-black text-slate-600">{res.partySize}</td>
-                                                    <td className="px-4 py-3"><StatusBadge status={res.status} /></td>
-                                                </tr>
-                                            ))}
-                                    </tbody>
-                                </table>
                             )}
+                            <FloorMap
+                                layout={{ layoutId: floor.layoutId, tables: floor.tables as any, name: "Floor View" }}
+                                selectedTableIds={selectedTableId ? [selectedTableId] : []}
+                                unavailableTableIds={[]}
+                                onSelectTable={handleTableSelect}
+                            />
                         </div>
                     )}
                 </div>
@@ -374,93 +248,97 @@ export default function AdminFloorMap() {
             </div>
 
             {/* Modals */}
-            {isWalkinModalOpen && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-6 animate-in fade-in duration-300">
-                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 animate-in zoom-in-95 duration-200">
-                        <h2 className="text-2xl font-black text-slate-900 mb-6 flex items-center gap-3">
-                            <UserPlus className="w-8 h-8 text-blue-600" />
-                            Add Walk-in
-                        </h2>
-                        <div className="space-y-6">
-                            <div className="space-y-2">
-                                <label className="text-xs font-black uppercase tracking-widest text-slate-400">Party Size</label>
-                                <div className="flex gap-4">
-                                    {[2, 4, 6, 8].map(size => (
-                                        <button
-                                            key={size}
-                                            onClick={() => setPartySize(size)}
-                                            className={clsx(
-                                                "flex-grow py-4 rounded-xl font-black text-xl border-2 transition-all",
-                                                partySize === size
-                                                    ? "bg-blue-600 border-blue-600 text-white shadow-lg scale-105"
-                                                    : "border-slate-100 bg-slate-50 text-slate-400 hover:border-slate-200"
-                                            )}
-                                        >
-                                            {size}
-                                        </button>
-                                    ))}
+            {
+                isWalkinModalOpen && (
+                    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-6 animate-in fade-in duration-300">
+                        <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 animate-in zoom-in-95 duration-200">
+                            <h2 className="text-2xl font-black text-slate-900 mb-6 flex items-center gap-3">
+                                <UserPlus className="w-8 h-8 text-blue-600" />
+                                Add Walk-in
+                            </h2>
+                            <div className="space-y-6">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-black uppercase tracking-widest text-slate-400">Party Size</label>
+                                    <div className="flex gap-4">
+                                        {[2, 4, 6, 8].map(size => (
+                                            <button
+                                                key={size}
+                                                onClick={() => setPartySize(size)}
+                                                className={clsx(
+                                                    "flex-grow py-4 rounded-xl font-black text-xl border-2 transition-all",
+                                                    partySize === size
+                                                        ? "bg-blue-600 border-blue-600 text-white shadow-lg scale-105"
+                                                        : "border-slate-100 bg-slate-50 text-slate-400 hover:border-slate-200"
+                                                )}
+                                            >
+                                                {size}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => setIsWalkinModalOpen(false)}
+                                        className="flex-grow py-4 rounded-xl font-bold text-slate-500 hover:bg-slate-50 transition-all border border-slate-100"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={() => walkinMutation.mutate({ partySize, tableIds: selectedTableId ? [selectedTableId] : undefined })}
+                                        disabled={walkinMutation.isPending}
+                                        className="flex-[2] bg-blue-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all flex items-center justify-center gap-2"
+                                    >
+                                        {walkinMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "Confirm & Seat"}
+                                    </button>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                )
+            }
 
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={() => setIsWalkinModalOpen(false)}
-                                    className="flex-grow py-4 rounded-xl font-bold text-slate-500 hover:bg-slate-50 transition-all border border-slate-100"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={() => walkinMutation.mutate({ partySize, tableIds: selectedTableId ? [selectedTableId] : undefined })}
-                                    disabled={walkinMutation.isPending}
-                                    className="flex-[2] bg-blue-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all flex items-center justify-center gap-2"
-                                >
-                                    {walkinMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "Confirm & Seat"}
-                                </button>
+            {
+                isFreeModalOpen && (
+                    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-6 animate-in fade-in duration-300">
+                        <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 animate-in zoom-in-95 duration-200">
+                            <h2 className="text-2xl font-black text-slate-900 mb-6 flex items-center gap-3">
+                                <Power className="w-8 h-8 text-red-600" />
+                                Free Table {selectedTableId}
+                            </h2>
+                            <div className="space-y-6">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-black uppercase tracking-widest text-slate-400">Reason for release</label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. Guest left early..."
+                                        className="w-full px-4 py-4 rounded-xl bg-slate-50 border border-slate-100 outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+                                        value={reason}
+                                        onChange={(e) => setReason(e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => setIsFreeModalOpen(false)}
+                                        className="flex-grow py-4 rounded-xl font-bold text-slate-500 hover:bg-slate-50 transition-all border border-slate-100"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={() => selectedTableId && freeMutation.mutate(selectedTableId)}
+                                        disabled={!reason || freeMutation.isPending}
+                                        className="flex-[2] bg-red-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-red-200 hover:bg-red-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                                    >
+                                        {freeMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "Free Now"}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
-
-            {isFreeModalOpen && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-6 animate-in fade-in duration-300">
-                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 animate-in zoom-in-95 duration-200">
-                        <h2 className="text-2xl font-black text-slate-900 mb-6 flex items-center gap-3">
-                            <Power className="w-8 h-8 text-red-600" />
-                            Free Table {selectedTableId}
-                        </h2>
-                        <div className="space-y-6">
-                            <div className="space-y-2">
-                                <label className="text-xs font-black uppercase tracking-widest text-slate-400">Reason for release</label>
-                                <input
-                                    type="text"
-                                    placeholder="e.g. Guest left early..."
-                                    className="w-full px-4 py-4 rounded-xl bg-slate-50 border border-slate-100 outline-none focus:ring-2 focus:ring-blue-500 font-medium"
-                                    value={reason}
-                                    onChange={(e) => setReason(e.target.value)}
-                                />
-                            </div>
-
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={() => setIsFreeModalOpen(false)}
-                                    className="flex-grow py-4 rounded-xl font-bold text-slate-500 hover:bg-slate-50 transition-all border border-slate-100"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={() => selectedTableId && freeMutation.mutate(selectedTableId)}
-                                    disabled={!reason || freeMutation.isPending}
-                                    className="flex-[2] bg-red-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-red-200 hover:bg-red-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                                >
-                                    {freeMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : "Free Now"}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 }
 
