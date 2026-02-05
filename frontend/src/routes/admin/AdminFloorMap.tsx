@@ -113,7 +113,7 @@ export default function AdminFloorMap() {
                         {/* Quick Dates */}
                         <div className="flex gap-2 pb-2 overflow-x-auto items-center">
                             {quickDates.map((item, idx) => {
-                                if (idx > 0 && (item.date.isSame(dayjs().add(1, 'day'), 'day'))) return null;
+                                if (idx > 1 && (item.date.isSame(dayjs().add(1, 'day'), 'day'))) return null;
                                 const dateStr = item.date.format("YYYY-MM-DD");
                                 const isSelected = selectedDate === dateStr;
                                 return (
