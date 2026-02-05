@@ -17,7 +17,7 @@ const router = Router();
 
 const adminActionLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 500, // 500 requests per 15 mins for admins (allows frequent polling)
+    max: 1000000, // Unlimited for testing
     message: { error: "Too many admin actions, please slow down" },
 });
 

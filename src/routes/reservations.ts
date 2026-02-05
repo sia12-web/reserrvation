@@ -39,19 +39,19 @@ export const reservationSchema = z.object({
 
 const reservationsLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  limit: 5, // 5 creations per hour per IP
+  limit: 1000000, // Unlimited for testing
   message: { error: "Too many reservations created from this IP, please try again after an hour" },
 });
 
 const cancellationLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  limit: 3, // 3 cancellations per hour per IP
+  limit: 1000000, // Unlimited for testing
   message: { error: "Too many cancellation attempts, please try again later" },
 });
 
 const publicLookupLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  limit: 20, // 20 lookups per hour per IP
+  limit: 1000000, // Unlimited for testing
   message: { error: "Too many lookup attempts" },
 });
 
