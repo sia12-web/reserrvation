@@ -132,7 +132,14 @@ const listQuerySchema = z.object({
 router.get(
     "/reservations",
     asyncHandler(async (req, res) => {
-        const query = listQuerySchema.parse(req.query);
+        let query;
+        try {
+            query = listQuerySchema.parse(req.query);
+        } catch (e) {
+            console.error("Query parse error:", e);
+            res.status(400).json({ message: "Invalid query parameters" });
+            return;
+        }
 
         const where: any = {};
 
@@ -150,10 +157,13 @@ router.get(
         }
 
         if (query.status) {
-            if (query.status.includes(",")) {
-                where.status = { in: query.status.split(",").filter(s => s.trim().length > 0) };
-            } else {
-                where.status = query.status;
+            const validStatuses = ["HOLD", "PENDING_DEPOSIT", "CONFIRMED", "CHECKED_IN", "COMPLETED", "CANCELLED", "NO_SHOW"];
+            const requested = query.status.split(",").map(s => s.trim()).filter(s => validStatuses.includes(s));
+
+            if (requested.length > 1) {
+                where.status = { in: requested };
+            } else if (requested.length === 1) {
+                where.status = requested[0];
             }
         }
 
