@@ -8,6 +8,7 @@ import { toRestaurantTime } from "../../utils/time";
 
 import { clsx } from "clsx";
 import { getGeometricCapacity } from "../../utils/tableUtils";
+import FloorMap from "../../components/reservation/FloorMap";
 
 export default function ReservationDetails() {
     const { id } = useParams();
@@ -238,28 +239,25 @@ export default function ReservationDetails() {
                                         </span>
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
-                                    {floor?.tables.map((table: any) => {
-                                        const isBusy = table.status !== "AVAILABLE" && !table.reservations?.some((r: any) => r.id === id);
-                                        const isSelected = newTableIds.includes(table.id);
-                                        return (
-                                            <button
-                                                key={table.id}
-                                                disabled={isBusy}
-                                                onClick={() => handleToggleTable(table.id)}
-                                                className={clsx(
-                                                    "aspect-square rounded-2xl flex flex-col items-center justify-center gap-1 transition-all border-b-4 active:border-b-0 active:translate-y-1 relative",
-                                                    isSelected ? "bg-blue-600 border-blue-800 text-white" :
-                                                        isBusy ? "bg-slate-50 border-slate-200 text-slate-300 cursor-not-allowed opacity-40" :
-                                                            "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
-                                                )}
-                                            >
-                                                <span className="text-lg font-black">{table.id}</span>
-                                                <span className="text-[8px] font-bold opacity-60">MAX {table.maxCapacity}</span>
-                                                {isBusy && <Clock className="w-3 h-3 absolute top-1 right-1" />}
-                                            </button>
-                                        );
-                                    })}
+                                <div className="h-[500px] w-full border border-slate-200 rounded-2xl overflow-hidden shadow-inner bg-slate-50">
+                                    {floor && (
+                                        <FloorMap
+                                            layout={{
+                                                id: floor.layoutId || "temp",
+                                                name: "Reassign View",
+                                                isActive: true,
+                                                tables: floor.tables,
+                                                adjacencyGraph: {},
+                                                effectiveDate: new Date().toISOString()
+                                            } as any}
+                                            unavailableTableIds={floor.tables
+                                                .filter((t: any) => t.status !== "AVAILABLE" && !t.reservations?.some((r: any) => r.id === id))
+                                                .map((t: any) => t.id)}
+                                            selectedTableIds={newTableIds}
+                                            onSelectTable={handleToggleTable}
+                                            isAdminView={true}
+                                        />
+                                    )}
                                 </div>
                             </div>
 

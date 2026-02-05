@@ -7,6 +7,7 @@ type FloorMapProps = {
     selectedTableIds?: string[];
     onSelectTable?: (tableId: string) => void;
     readOnly?: boolean;
+    isAdminView?: boolean;
     partySize?: number;
 };
 
@@ -16,30 +17,22 @@ export default function FloorMap({
     unavailableTableIds = [],
     selectedTableIds = [],
     onSelectTable,
-    readOnly = false,
+    isAdminView = false,
     partySize,
 }: FloorMapProps) {
     const PADDING = 40;
 
-    // Calculate bounds dynamically from tables to ensure they are all visible
-    const bounds = layout.tables.reduce(
-        (acc, t) => {
-            return {
-                minX: Math.min(acc.minX, t.x),
-                minY: Math.min(acc.minY, t.y),
-                maxX: Math.max(acc.maxX, t.x + t.width),
-                maxY: Math.max(acc.maxY, t.y + t.height),
-            };
-        },
-        { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity }
-    );
+    // ... (bounds calculation)
+
+    // Determine effective view mode
+    const effectiveIsAdminView = isAdminView || layout.name === "Floor View";
 
     const getTableStatus = (table: Table) => {
         if (unavailableTableIds.includes(table.id)) return 'LOCKED';
         if (selectedTableIds.includes(table.id)) return 'SELECTED';
 
         // Kiosk/User View: Check if party fits
-        if (!isAdminView && partySize) {
+        if (!effectiveIsAdminView && partySize) {
             // Rule: Party must fit max capacity
             if (partySize > table.maxCapacity) return 'INVALID';
 
@@ -54,7 +47,8 @@ export default function FloorMap({
         return table.status || 'AVAILABLE';
     };
 
-    const isAdminView = layout.name === "Floor View";
+    // deleted const isAdminView line
+
 
     return (
         <div className="w-full h-full relative select-none flex flex-col border border-slate-200 rounded-xl overflow-hidden bg-slate-50/50">
@@ -87,7 +81,7 @@ export default function FloorMap({
                             const isSelected = status === 'SELECTED';
 
                             const isTrulyLocked = status === 'LOCKED';
-                            const isDimmed = !isAdminView && (status === 'LOCKED' || status === 'INVALID' || status === 'OCCUPIED' || status === 'RESERVED');
+                            const isDimmed = !effectiveIsAdminView && (status === 'LOCKED' || status === 'INVALID' || status === 'OCCUPIED' || status === 'RESERVED');
 
                             let fillColor = "#ffffff";
                             let strokeColor = "#cbd5e1";
@@ -100,10 +94,10 @@ export default function FloorMap({
                                 fillColor = "#f1f5f9"; // Slate 100 
                                 strokeColor = "#cbd5e1";
                                 opacity = "0.7";
-                            } else if (status === 'OCCUPIED' && isAdminView) {
+                            } else if (status === 'OCCUPIED' && effectiveIsAdminView) {
                                 fillColor = "#fffbeb"; // Amber 50
                                 strokeColor = "#fbbf24";
-                            } else if (status === 'RESERVED' && isAdminView) {
+                            } else if (status === 'RESERVED' && effectiveIsAdminView) {
                                 fillColor = "#faf5ff"; // Purple 50
                                 strokeColor = "#a855f7";
                             } else {
@@ -152,8 +146,8 @@ export default function FloorMap({
                                             className={clsx(
                                                 "text-[24px] font-black pointer-events-none select-none",
                                                 isSelected ? "fill-white" :
-                                                    (status === "OCCUPIED" && isAdminView) ? "fill-amber-900" :
-                                                        (status === "RESERVED" && isAdminView) ? "fill-purple-900" :
+                                                    (status === "OCCUPIED" && effectiveIsAdminView) ? "fill-amber-900" :
+                                                        (status === "RESERVED" && effectiveIsAdminView) ? "fill-purple-900" :
                                                             "fill-slate-900"
                                             )}
                                         >
@@ -181,8 +175,8 @@ export default function FloorMap({
                                         className={clsx(
                                             "text-[24px] font-black pointer-events-none select-none",
                                             isSelected ? "fill-white" :
-                                                (status === "OCCUPIED" && isAdminView) ? "fill-amber-900" :
-                                                    (status === "RESERVED" && isAdminView) ? "fill-purple-900" :
+                                                (status === "OCCUPIED" && effectiveIsAdminView) ? "fill-amber-900" :
+                                                    (status === "RESERVED" && effectiveIsAdminView) ? "fill-purple-900" :
                                                         "fill-slate-900"
                                         )}
                                     >
