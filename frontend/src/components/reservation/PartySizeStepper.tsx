@@ -24,7 +24,19 @@ export default function PartySizeStepper({
       >
         −
       </button>
-      <div className="text-2xl font-semibold w-12 text-center">{value}</div>
+      <input
+        type="number"
+        className="text-2xl font-semibold w-16 text-center bg-transparent border-b-2 border-transparent focus:border-slate-900 outline-none transition-colors mx-2 h-12"
+        value={value}
+        onChange={(e) => {
+          const val = parseInt(e.target.value);
+          if (!isNaN(val)) onChange(val);
+        }}
+        onBlur={() => {
+          if (value < min) onChange(min);
+          if (value > max) onChange(max);
+        }}
+      />
       <button
         type="button"
         className="h-12 w-12 rounded-md bg-slate-900 text-white text-2xl font-semibold"
