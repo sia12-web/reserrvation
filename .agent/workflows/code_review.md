@@ -82,3 +82,25 @@ If the user applies fixes:
 2.  Verify the specific logic changes (e.g., "Did the lock key format change?").
 3.  Confirm tests pass and cover the edge cases.
 4.  Update the "Readiness Score".
+
+---
+
+## Environment-Specific Reviews
+
+### For Dev Branch
+Focus on:
+- [ ] Code compiles without errors
+- [ ] No hardcoded production values
+- [ ] Local environment properly isolated
+- [ ] Basic functionality works
+
+### For Prod Branch (CRITICAL)
+**Run full /deploy workflow before merging to main.**
+Additional checks:
+- [ ] All security concerns addressed
+- [ ] Performance implications considered  
+- [ ] Database migrations are safe (no data loss)
+- [ ] Rollback plan documented
+- [ ] Environment variables verified for production
+
+See `/deploy` workflow for complete production checklist.
