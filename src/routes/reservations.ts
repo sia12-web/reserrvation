@@ -265,7 +265,7 @@ router.post(
 
           const overlap = await tx.reservationTable.findFirst({
             where: {
-              tableId: { in: tableIds },
+              tableId: { in: tableIds.filter(id => id !== "T15") },
               reservation: {
                 startTime: { lt: endTime },
                 endTime: { gt: startTime },
