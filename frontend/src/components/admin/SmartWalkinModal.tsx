@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { UserPlus, Clock, Users, CheckCircle2, AlertTriangle, ArrowRight } from "lucide-react";
+import { UserPlus, Timer, Users, TriangleAlert, ArrowRight } from "lucide-react";
 import { clsx } from "clsx";
 import dayjs from "dayjs";
 import { FloorState } from "../../api/admin.api";
@@ -113,7 +113,7 @@ export default function SmartWalkinModal({ isOpen, onClose, tables, onConfirm }:
                 <div className="flex justify-between items-start mb-6">
                     <div>
                         <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3">
-                            <Clock className="w-8 h-8 text-indigo-600" />
+                            <Timer className="w-8 h-8 text-indigo-600" />
                             Smart Walk-in
                         </h2>
                         <p className="text-slate-500 font-medium mt-1">
@@ -161,7 +161,7 @@ export default function SmartWalkinModal({ isOpen, onClose, tables, onConfirm }:
 
                     <div className="space-y-3">
                         <label className="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                            <Clock className="w-4 h-4" /> Est. Duration
+                            <Timer className="w-4 h-4" /> Est. Duration
                         </label>
                         <div className="flex gap-2">
                             {durationValues.map(mins => (
@@ -246,7 +246,7 @@ export default function SmartWalkinModal({ isOpen, onClose, tables, onConfirm }:
                         ))
                     ) : (
                         <div className="text-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-200">
-                            <AlertTriangle className="w-10 h-10 text-amber-500 mx-auto mb-3" />
+                            <TriangleAlert className="w-10 h-10 text-amber-500 mx-auto mb-3" />
                             <p className="font-bold text-slate-900">No safe tables found</p>
                             <p className="text-sm text-slate-500">All tables are full or reserved within {duration} mins.</p>
                             <p className="text-sm text-slate-500 mt-2">Try T15 (Overflow) explicitly?</p>
