@@ -4,8 +4,9 @@ import { fetchFloorState, freeTable, createWalkin } from "../../api/admin.api";
 import FloorMap from "../../components/reservation/FloorMap";
 import {
     UserPlus, Power, Info, AlertCircle, CheckCircle2,
-    Loader2, ChevronLeft, ChevronRight, CalendarDays
+    Loader2, ChevronLeft, ChevronRight, CalendarDays, Brain
 } from "lucide-react";
+import SmartWalkinModal from "../../components/admin/SmartWalkinModal";
 import dayjs from "dayjs";
 import { toRestaurantTime, getRestaurantNow } from "../../utils/time";
 import { clsx } from "clsx";
@@ -16,6 +17,7 @@ export default function AdminFloorMap() {
     const [selectedDate, setSelectedDate] = useState(() => toRestaurantTime(new Date().toISOString()).format("YYYY-MM-DD"));
 
     const [isWalkinModalOpen, setIsWalkinModalOpen] = useState(false);
+    const [isSmartWalkinModalOpen, setIsSmartWalkinModalOpen] = useState(false);
     const [isFreeModalOpen, setIsFreeModalOpen] = useState(false);
     const [reason, setReason] = useState("");
     const [partySize, setPartySize] = useState(2);
@@ -233,10 +235,19 @@ export default function AdminFloorMap() {
                                         className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200 transition-all active:scale-95 flex items-center justify-center gap-2"
                                     >
                                         <UserPlus className="w-5 h-5" />
-                                        Add Walk-in
+                                        Manual Walk-in
                                     </button>
                                 )}
                             </div>
+
+                            {/* Smart Walk-in Button (Always visible if floor loaded) */}
+                            <button
+                                onClick={() => setIsSmartWalkinModalOpen(true)}
+                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-indigo-200 transition-all active:scale-95 flex items-center justify-center gap-2"
+                            >
+                                <Brain className="w-5 h-5" />
+                                Smart Recommendation
+                            </button>
                         </div>
                     ) : (
                         <div className="py-12 text-center space-y-3 opacity-40">
@@ -338,6 +349,17 @@ export default function AdminFloorMap() {
                     </div>
                 )
             }
+
+            {/* Smart Walk-in Modal */}
+            <SmartWalkinModal
+                isOpen={isSmartWalkinModalOpen}
+                onClose={() => setIsSmartWalkinModalOpen(false)}
+                tables={floor?.tables || []}
+                onConfirm={(tableId, size) => {
+                    setIsSmartWalkinModalOpen(false);
+                    walkinMutation.mutate({ partySize: size, tableIds: [tableId] });
+                }}
+            />
         </div >
     );
 }
