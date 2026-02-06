@@ -1,7 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import ReservationForm from "../../components/reservation/ReservationForm";
 import type { ReservationDraft } from "../../components/reservation/ReservationForm";
-import type { ReservationRequest } from "../../utils/validation";
 import type { ReservationResponse } from "../../api/reservations.api";
 import ClientShell from "../../app/layout/ClientShell";
 
@@ -22,10 +21,6 @@ export default function NewReservationPage() {
     });
   };
 
-  const handleConflict = (args: { payload: ReservationRequest; draft: ReservationDraft }) => {
-    navigate("/reservations/conflict", { state: args });
-  };
-
   return (
     <ClientShell
       title="Reserve a Table"
@@ -34,7 +29,6 @@ export default function NewReservationPage() {
       <ReservationForm
         defaultValues={state?.draft}
         onSuccess={handleSuccess}
-        onConflict={handleConflict}
       />
     </ClientShell>
   );

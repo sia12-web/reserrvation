@@ -2,7 +2,6 @@ import React from "react";
 import { Route, Routes, Navigate, Outlet } from "react-router-dom";
 import NewReservationPage from "./routes/kiosk/NewReservationPage";
 import ReservationSuccessPage from "./routes/kiosk/ReservationSuccessPage";
-import ReservationConflictPage from "./routes/kiosk/ReservationConflictPage";
 import InactivityGuard from "./components/kiosk/InactivityGuard";
 import AdminGuard, { AdminLogin } from "./components/admin/AdminGuard";
 import AdminLayout from "./app/layout/AdminLayout";
@@ -67,10 +66,6 @@ export default function App() {
           <Route
             path="/reservations/:id/success"
             element={<ReservationSuccessPage />}
-          />
-          <Route
-            path="/reservations/conflict"
-            element={<ReservationConflictPage />}
           />
         </Route>
 

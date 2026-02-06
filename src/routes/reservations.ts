@@ -104,7 +104,7 @@ router.post(
       id: table.id,
       type: (table.type as TableConfig["type"]) ?? "STANDARD",
       minCapacity: table.minCapacity ?? 1,
-      maxCapacity: table.maxCapacity ?? 4,
+      maxCapacity: table.id === "T15" ? 999 : (table.maxCapacity ?? 4),
       priorityScore: table.priorityScore ?? 0,
     }));
 

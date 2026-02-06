@@ -26,7 +26,6 @@ export type ReservationDraft = {
 type ReservationFormProps = {
   defaultValues?: Partial<ReservationDraft>;
   onSuccess: (response: unknown) => void;
-  onConflict: (args: { payload: ReservationRequest; draft: ReservationDraft }) => void;
 };
 
 
@@ -37,7 +36,6 @@ const SLOT_PAGE_SIZE = 24;
 export default function ReservationForm({
   defaultValues,
   onSuccess,
-  onConflict,
 }: ReservationFormProps) {
   const { resetKiosk } = useKioskReset();
   const { generateTimeSlots, getNextStartSlot, getRestaurantNow, toRestaurantTime, toUtcIso } =
@@ -163,17 +161,8 @@ export default function ReservationForm({
         }
 
         if (error instanceof ApiError && error.status === 409) {
-          onConflict({
-            payload,
-            draft: {
-              clientName,
-              clientPhone,
-              clientEmail,
-              specialRequests,
-              partySize,
-              startTime: payload.startTime,
-            },
-          });
+          // Tables are strictly booked, but we should retry or refresh
+          setFormError(error.message || "Tables are no longer available. Please select another slot.");
           return;
         }
 
