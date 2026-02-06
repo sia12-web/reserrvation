@@ -26,7 +26,8 @@ export default function SmartWalkinModal({ isOpen, onClose, tables, onConfirm }:
         // 1. Filter Candidates
         const candidates = tables.filter(t => {
             // Must be strictly AVAILABLE (not occupied/reserved right now)
-            if (t.status !== "AVAILABLE") return false;
+            // EXCEPTION: T15 is overflow/infinite, so it's always available for walk-ins.
+            if (t.status !== "AVAILABLE" && t.id !== "T15") return false;
 
             // Capacity Check (T15 is infinite)
             if (t.id === "T15") return true;
@@ -70,7 +71,10 @@ export default function SmartWalkinModal({ isOpen, onClose, tables, onConfirm }:
                 .filter(r => r.start.isAfter(now))
                 .sort((a, b) => a.start.diff(b.start))[0];
 
-            if (nextRes) {
+            if (t.id === "T15") {
+                score += 50;
+                reasons.push({ text: "Always Available (Overflow)", type: 'good' });
+            } else if (nextRes) {
                 const minutesUntil = nextRes.start.diff(now, 'minute');
 
                 if (minutesUntil < duration) {
