@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { UserPlus, Timer, Users, TriangleAlert, ArrowRight } from "lucide-react";
 import { clsx } from "clsx";
 import dayjs from "dayjs";
-import { FloorState } from "../../api/admin.api";
+import type { FloorState } from "../../api/admin.api";
 import { toRestaurantTime, getRestaurantNow } from "../../utils/time";
 
 type Table = FloorState['tables'][0];
