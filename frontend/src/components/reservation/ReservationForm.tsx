@@ -91,10 +91,10 @@ export default function ReservationForm({
     const tomorrow = today.add(1, "day");
 
     const getNextDay = (targetDayNum: number) => {
-      let d = today.day(targetDayNum);
-      // If today is targetDay or after, move to next week
-      if (d.isBefore(today, "day") || d.isSame(today, "day")) {
-        d = d.add(1, "week");
+      // Start from tomorrow to ensure "Next X" is always in the future
+      let d = today.add(1, "day");
+      while (d.day() !== targetDayNum) {
+        d = d.add(1, "day");
       }
       return d;
     };

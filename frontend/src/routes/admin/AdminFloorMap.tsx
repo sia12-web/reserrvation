@@ -34,7 +34,7 @@ export default function AdminFloorMap() {
     const now = getRestaurantNow();
 
     const getNextBusyDay = (targetDay: number) => {
-        let d = now;
+        let d = now.add(1, 'day'); // Start from tomorrow to ensure "Next X" is always in the future
         while (d.day() !== targetDay) d = d.add(1, 'day');
         return d;
     };
