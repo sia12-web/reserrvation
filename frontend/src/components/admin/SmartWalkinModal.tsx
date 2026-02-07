@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
-import { UserPlus, Timer, Users, TriangleAlert, ArrowRight } from "lucide-react";
+import { Timer, Users, TriangleAlert, ArrowRight } from "lucide-react";
 import { clsx } from "clsx";
-import dayjs from "dayjs";
 import type { FloorState } from "../../api/admin.api";
 import { toRestaurantTime, getRestaurantNow } from "../../utils/time";
 
@@ -16,7 +15,7 @@ interface SmartWalkinModalProps {
 
 export default function SmartWalkinModal({ isOpen, onClose, tables, onConfirm }: SmartWalkinModalProps) {
     const [partySize, setPartySize] = useState(2);
-    const [durationValues, setDurationValues] = useState([60, 90, 120]);
+    const [durationValues] = useState([60, 90, 120]);
     const [duration, setDuration] = useState(90);
 
     const recommendations = useMemo(() => {
@@ -187,7 +186,7 @@ export default function SmartWalkinModal({ isOpen, onClose, tables, onConfirm }:
                     <h3 className="text-sm font-black uppercase tracking-widest text-slate-400 mb-2">Recommended Tables</h3>
 
                     {recommendations.length > 0 ? (
-                        recommendations.map(({ table, score, reasons, nextRes }, idx) => (
+                        recommendations.map(({ table, reasons }, idx) => (
                             <div
                                 key={table.id}
                                 className={clsx(

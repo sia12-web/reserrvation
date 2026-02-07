@@ -21,6 +21,18 @@ COPY tsconfig.json ./
 COPY tsconfig.build.json ./
 COPY src ./src/
 
+# Copy frontend
+COPY frontend ./frontend
+
+# Install frontend dependencies and build
+WORKDIR /app/frontend
+# We need dev dependencies for the build
+RUN npm ci --include=dev
+RUN npm run build
+
+# Switch back to app root to build backend
+WORKDIR /app
+
 # Build TypeScript
 RUN npm run build
 
@@ -40,8 +52,9 @@ RUN npm ci --omit=dev
 COPY prisma ./prisma/
 RUN npx prisma generate
 
-# Copy built application from builder stage
+# Copy application artifacts
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/frontend/dist ./frontend/dist
 
 # Set environment
 ENV NODE_ENV=production
